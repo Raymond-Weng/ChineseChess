@@ -43,6 +43,9 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
                         throw new RuntimeException(e);
                     }
                     break;
+                case "%help":
+                    message.reply("請前往<#1272745478538264589>確認規則以及使用方式").queue();
+                    break;
             }
 
         }
