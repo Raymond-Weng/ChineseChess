@@ -32,9 +32,8 @@ public class Main {
             connection = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
             if(!databaseExists) {
                 Statement stmt = connection.createStatement();
-                stmt.execute("CREATE TABLE PLAYER" +
+                stmt.executeUpdate("CREATE TABLE PLAYER" +
                         "(DISCORD_ID INTEGER PRIMARY KEY NOT NULL ," +
-                        "NAME TEXT NOT NULL," +
                         "POINT INTEGER NOT NULL," +
                         "GAME_PLAYING INTEGER NOT NULL," +
                         "DATE_CREATED DATE NOT NULL)");
@@ -50,9 +49,5 @@ public class Main {
                 .enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MESSAGES)
                 .addEventListeners(new EventListener());
         jdaBuilder.build();
-    }
-
-    public Connection getConnection() {
-        return connection;
     }
 }
