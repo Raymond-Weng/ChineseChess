@@ -28,17 +28,20 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
                     try {
                         synchronized (Main.main.connection){
                             Statement stmt = Main.main.connection.createStatement();
-                            ResultSet rs = stmt.executeQuery("SELECT * FROM PLAYER WHERE POINT >= 1500 ORDER BY POINT DESC LIMIT 10");
+                            ResultSet rs = stmt.executeQuery("SELECT * FROM PLAYER WHERE POINT >= 1200 ORDER BY POINT DESC LIMIT 10");
+                            int cnt = 0;
                             while (rs.next()) {
-                                m.append(message.getJDA().getUserById(rs.getLong("DISCORD_ID"))).append("\n");
+                                cnt++;
+                                m.append(cnt).append(". ").append("<@").append(rs.getString("DISCORD_ID")).append(">").append("\n");
                             }
                             while (m.toString().split("\n").length < 10){
-                                m.append("空缺\n");
+                                cnt++;
+                                m.append(cnt).append(". 空缺\n");
                             }
                             if(m.toString().split("\n")[9].equals("空缺")){
-                                m.append("\n註：只有分數大於1500的人可以進榜，如果還沒進榜請繼續努力");
+                                m.append("\n註：只有分數大於1200的人可以進榜，如果還沒進榜請繼續努力");
                             }
-                            message.reply(m.toString()).queue();
+                            message.reply(m.toString()).setSuppressedNotifications(true).queue();
                             rs.close();
                             stmt.close();
                         }
