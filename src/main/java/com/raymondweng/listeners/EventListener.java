@@ -39,6 +39,7 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
                                 m.append("\n註：只有分數大於1500的人可以進榜，如果還沒進榜請繼續努力");
                             }
                             message.reply(m.toString()).queue();
+                            rs.close();
                             stmt.close();
                         }
                     } catch (SQLException e) {
@@ -48,6 +49,26 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
                 case "%help":
                     message.reply("請前往<#1272745478538264589>確認規則以及使用方式").queue();
                     break;
+                case "%register":
+                    synchronized (Main.main.connection){
+                        try {
+                            Statement stmt = Main.main.connection.createStatement();
+                            ResultSet rs = stmt.executeQuery("SELECT * FROM PLAYER WHERE DISCORD_ID = " + message.getAuthor().getId());
+                            if(rs.next()){
+                                message.reply("你已經註冊過了").queue();
+                            }else{
+                                Statement stmt2 = Main.main.connection.createStatement();
+                                stmt.executeUpdate("INSERT INTO PLAYER (DISCORD_ID,POINT,GAME_PLAYING,DATE_CREATED) " +
+                                        "VALUES (" + message.getAuthor().getId() + ",1000,-1,date('now'))");
+                                stmt2.close();
+                                message.reply("註冊完成，祝你玩得愉快").queue();
+                            }
+                            rs.close();
+                            stmt.close();
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
             }
 
         }
