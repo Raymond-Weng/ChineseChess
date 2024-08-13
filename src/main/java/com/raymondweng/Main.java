@@ -13,7 +13,7 @@ import java.sql.Statement;
 public class Main {
     public static Main main;
 
-    public Connection connection;
+    public final Connection connection;
 
     public static void main(String[] args) throws IOException {
         System.out.print("Input the token: ");
