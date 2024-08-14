@@ -4,7 +4,10 @@ import com.raymondweng.listeners.EventListener;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -30,13 +33,22 @@ public class Main {
         boolean databaseExists = new File("./database/data.db").exists();
         try {
             connection = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
-            if(!databaseExists) {
+            if (!databaseExists) {
                 Statement stmt = connection.createStatement();
                 stmt.executeUpdate("CREATE TABLE PLAYER" +
                         "(DISCORD_ID INTEGER PRIMARY KEY NOT NULL ," +
-                        "POINT INTEGER NOT NULL," +
-                        "GAME_PLAYING INTEGER NOT NULL," +
-                        "DATE_CREATED DATE NOT NULL)");
+                        "POINT INTEGER NOT NULL DEFAULT 1000," +
+                        "DATE_CREATED DATE NOT NULL," +
+                        "GAME_PLAYING INTEGER DEFAULT NULL," +
+                        "PLAYING_BLACK BOOLEAN DEFAULT NULL)");
+                stmt.executeUpdate("CREATE TABLE GAME" +
+                        "(ID INTEGER PRIMARY KEY AUTOINCREMENT ," +
+                        "BLACK_PLAYER INTEGER NOT NULL," +
+                        "RED_PLAYER INTEGER NOT NULL," +
+                        "PROCESS TEXT NOT NULL DEFAULT ''," +
+                        "PLAYING BOOLEAN NOT NULL DEFAULT TRUE, " +
+                        "TIME_LIMIT INTEGER NOT NULL DEFAULT 0, " +
+                        "LAST_MOVE INTEGER NOT NULL)");
                 stmt.close();
             }
         } catch (SQLException e) {

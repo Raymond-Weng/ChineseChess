@@ -60,10 +60,8 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
                             if (rs.next()) {
                                 message.reply("你已經註冊過了").queue();
                             } else {
-                                Statement stmt2 = Main.main.connection.createStatement();
-                                stmt.executeUpdate("INSERT INTO PLAYER (DISCORD_ID,POINT,GAME_PLAYING,DATE_CREATED) " +
-                                        "VALUES (" + message.getAuthor().getId() + ",1000,-1,date('now'))");
-                                stmt2.close();
+                                stmt.executeUpdate("INSERT INTO PLAYER (DISCORD_ID, DATE_CREATED) " +
+                                        "VALUES (" + message.getAuthor().getId() + ", DATE('now'))");
                                 message.reply("註冊完成，祝你玩得愉快").queue();
                             }
                             rs.close();
