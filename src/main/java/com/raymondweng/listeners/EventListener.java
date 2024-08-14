@@ -2,6 +2,7 @@ package com.raymondweng.listeners;
 
 
 import com.raymondweng.Main;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -24,24 +25,23 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
                     }
                     break;
                 case "%leader-board":
-                    StringBuilder m = new StringBuilder();
                     try {
-                        synchronized (Main.main.connection){
+                        synchronized (Main.main.connection) {
                             Statement stmt = Main.main.connection.createStatement();
                             ResultSet rs = stmt.executeQuery("SELECT * FROM PLAYER WHERE POINT >= 1200 ORDER BY POINT DESC LIMIT 10");
+                            EmbedBuilder e = new EmbedBuilder();
+                            e.setTitle("Leaderboard");
                             int cnt = 0;
                             while (rs.next()) {
                                 cnt++;
-                                m.append(cnt).append(". ").append("<@").append(rs.getString("DISCORD_ID")).append(">").append("\n");
+                                e.addField("第" + cnt + "名", "<@" + rs.getString("DISCORD_ID") + ">" + "\n", false);
                             }
-                            while (m.toString().split("\n").length < 10){
+                            while (cnt < 10) {
                                 cnt++;
-                                m.append(cnt).append(". 空缺\n");
+                                e.addField("第" + cnt + "名", "空缺", false);
                             }
-                            if(m.toString().split("\n")[9].equals("空缺")){
-                                m.append("\n註：只有分數大於1200的人可以進榜，如果還沒進榜請繼續努力");
-                            }
-                            message.reply(m.toString()).setSuppressedNotifications(true).queue();
+                            e.setFooter("\n註：只有分數大於1200的人可以進榜，如果還沒進榜請繼續努力");
+                            message.replyEmbeds(e.build()).queue();
                             rs.close();
                             stmt.close();
                         }
@@ -53,13 +53,13 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
                     message.reply("請前往<#1272745478538264589>確認規則以及使用方式").queue();
                     break;
                 case "%register":
-                    synchronized (Main.main.connection){
+                    synchronized (Main.main.connection) {
                         try {
                             Statement stmt = Main.main.connection.createStatement();
                             ResultSet rs = stmt.executeQuery("SELECT * FROM PLAYER WHERE DISCORD_ID = " + message.getAuthor().getId());
-                            if(rs.next()){
+                            if (rs.next()) {
                                 message.reply("你已經註冊過了").queue();
-                            }else{
+                            } else {
                                 Statement stmt2 = Main.main.connection.createStatement();
                                 stmt.executeUpdate("INSERT INTO PLAYER (DISCORD_ID,POINT,GAME_PLAYING,DATE_CREATED) " +
                                         "VALUES (" + message.getAuthor().getId() + ",1000,-1,date('now'))");
