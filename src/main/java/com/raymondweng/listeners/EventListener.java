@@ -28,13 +28,13 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
                     try {
                         synchronized (Main.main.connection) {
                             Statement stmt = Main.main.connection.createStatement();
-                            ResultSet rs = stmt.executeQuery("SELECT * FROM PLAYER WHERE POINT >= 1200 ORDER BY POINT DESC LIMIT 10");
+                            ResultSet rs = stmt.executeQuery("SELECT DISCORD_ID, POINT FROM PLAYER WHERE POINT >= 1200 ORDER BY POINT DESC, DATE_CREATED ACS LIMIT 10");
                             EmbedBuilder e = new EmbedBuilder();
                             e.setTitle("Leaderboard");
                             int cnt = 0;
                             while (rs.next()) {
                                 cnt++;
-                                e.addField("第" + cnt + "名", "<@" + rs.getString("DISCORD_ID") + ">" + "\n", false);
+                                e.addField("第" + cnt + "名", "<@" + rs.getString("DISCORD_ID") + "> (" + rs.getString("POINT") + "分)\n", false);
                             }
                             while (cnt < 10) {
                                 cnt++;
@@ -56,7 +56,7 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
                     synchronized (Main.main.connection) {
                         try {
                             Statement stmt = Main.main.connection.createStatement();
-                            ResultSet rs = stmt.executeQuery("SELECT * FROM PLAYER WHERE DISCORD_ID = " + message.getAuthor().getId());
+                            ResultSet rs = stmt.executeQuery("SELECT DISCORD_ID FROM PLAYER WHERE DISCORD_ID = " + message.getAuthor().getId());
                             if (rs.next()) {
                                 message.reply("你已經註冊過了").queue();
                             } else {
