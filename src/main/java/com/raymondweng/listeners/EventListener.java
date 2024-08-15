@@ -28,7 +28,7 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
                     try {
                         synchronized (Main.main.connection) {
                             Statement stmt = Main.main.connection.createStatement();
-                            ResultSet rs = stmt.executeQuery("SELECT DISCORD_ID, POINT FROM PLAYER WHERE POINT >= 1200 ORDER BY POINT DESC, DATE_CREATED ACS LIMIT 10");
+                            ResultSet rs = stmt.executeQuery("SELECT DISCORD_ID, POINT FROM PLAYER WHERE POINT >= 1200 ORDER BY POINT DESC, DATE_CREATED ASC LIMIT 10");
                             EmbedBuilder e = new EmbedBuilder();
                             e.setTitle("Leaderboard");
                             int cnt = 0;

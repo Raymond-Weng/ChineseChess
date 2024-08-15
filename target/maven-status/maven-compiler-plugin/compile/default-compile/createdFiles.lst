@@ -1,1 +1,4 @@
+com\raymondweng\core\Player.class
+com\raymondweng\listeners\EventListener.class
+com\raymondweng\core\Game.class
 com\raymondweng\Main.class
