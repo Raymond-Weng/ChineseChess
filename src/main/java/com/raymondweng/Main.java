@@ -2,6 +2,7 @@ package com.raymondweng;
 
 import com.raymondweng.listeners.EventListener;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 
 import java.io.BufferedReader;
@@ -58,7 +59,7 @@ public class Main {
         // connect to discord
         JDABuilder jdaBuilder = JDABuilder.createDefault(token);
         jdaBuilder
-                .enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MESSAGES)
+                .enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_VOICE_STATES)
                 .addEventListeners(new EventListener());
         jdaBuilder.build();
     }

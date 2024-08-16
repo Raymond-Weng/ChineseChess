@@ -5,6 +5,7 @@ import com.raymondweng.Main;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.GenericEvent;
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,6 +17,23 @@ import java.util.Objects;
 public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
     @Override
     public void onEvent(@NotNull GenericEvent genericEvent) {
+        if(genericEvent instanceof GuildVoiceUpdateEvent){
+            if(((GuildVoiceUpdateEvent) genericEvent).getChannelLeft() != null){
+                if(!((GuildVoiceUpdateEvent) genericEvent).getChannelLeft().getId().equals("1270560414719279236") &&((GuildVoiceUpdateEvent) genericEvent).getChannelLeft().getMembers().isEmpty()){
+                    ((GuildVoiceUpdateEvent) genericEvent).getChannelLeft().delete().queue();
+                }
+            }
+            if(((GuildVoiceUpdateEvent) genericEvent).getChannelJoined() != null){
+                if(((GuildVoiceUpdateEvent) genericEvent).getChannelJoined().getId().equals("1270560414719279236")){
+                    Objects.requireNonNull(genericEvent.getJDA()
+                            .getCategoryById("1270560414274687009"))
+                            .createVoiceChannel(((GuildVoiceUpdateEvent) genericEvent).getMember().getUser().getEffectiveName() + "的語音頻道")
+                            .queue(channel -> {
+                                ((GuildVoiceUpdateEvent) genericEvent).getGuild().moveVoiceMember(((GuildVoiceUpdateEvent) genericEvent).getMember(), channel).queue();
+                            });
+                }
+            }
+        }
         if (genericEvent instanceof MessageReceivedEvent && !Objects.requireNonNull(((MessageReceivedEvent) genericEvent).getMember()).getId().equals(genericEvent.getJDA().getSelfUser().getId())) {
             Message message = ((MessageReceivedEvent) genericEvent).getMessage();
             switch (message.getContentRaw().split(" ")[0]) {
