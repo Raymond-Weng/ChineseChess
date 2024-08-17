@@ -15,18 +15,36 @@ import java.sql.Statement;
 import java.util.Objects;
 
 public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
+    public boolean registered(String id) {
+        boolean registered = false;
+        synchronized (Main.main.connection) {
+            try {
+                Statement stmt = Main.main.connection.createStatement();
+                ResultSet rs = stmt.executeQuery("SELECT DISCORD_ID FROM PLAYER WHERE DISCORD_ID = " + id);
+                if (rs.next()) {
+                    registered = true;
+                }
+                rs.close();
+                stmt.close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return registered;
+    }
+
     @Override
     public void onEvent(@NotNull GenericEvent genericEvent) {
-        if(genericEvent instanceof GuildVoiceUpdateEvent){
-            if(((GuildVoiceUpdateEvent) genericEvent).getChannelLeft() != null){
-                if(!((GuildVoiceUpdateEvent) genericEvent).getChannelLeft().getId().equals("1270560414719279236") &&((GuildVoiceUpdateEvent) genericEvent).getChannelLeft().getMembers().isEmpty()){
+        if (genericEvent instanceof GuildVoiceUpdateEvent) {
+            if (((GuildVoiceUpdateEvent) genericEvent).getChannelLeft() != null) {
+                if (!((GuildVoiceUpdateEvent) genericEvent).getChannelLeft().getId().equals("1270560414719279236") && ((GuildVoiceUpdateEvent) genericEvent).getChannelLeft().getMembers().isEmpty()) {
                     ((GuildVoiceUpdateEvent) genericEvent).getChannelLeft().delete().queue();
                 }
             }
-            if(((GuildVoiceUpdateEvent) genericEvent).getChannelJoined() != null){
-                if(((GuildVoiceUpdateEvent) genericEvent).getChannelJoined().getId().equals("1270560414719279236")){
+            if (((GuildVoiceUpdateEvent) genericEvent).getChannelJoined() != null) {
+                if (((GuildVoiceUpdateEvent) genericEvent).getChannelJoined().getId().equals("1270560414719279236")) {
                     Objects.requireNonNull(genericEvent.getJDA()
-                            .getCategoryById("1270560414274687009"))
+                                    .getCategoryById("1270560414274687009"))
                             .createVoiceChannel(((GuildVoiceUpdateEvent) genericEvent).getMember().getUser().getEffectiveName() + "的語音頻道")
                             .queue(channel -> {
                                 ((GuildVoiceUpdateEvent) genericEvent).getGuild().moveVoiceMember(((GuildVoiceUpdateEvent) genericEvent).getMember(), channel).queue();
@@ -71,21 +89,18 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
                     message.reply("請前往<#1272745478538264589>確認規則以及使用方式").queue();
                     break;
                 case "%register":
-                    synchronized (Main.main.connection) {
-                        try {
-                            Statement stmt = Main.main.connection.createStatement();
-                            ResultSet rs = stmt.executeQuery("SELECT DISCORD_ID FROM PLAYER WHERE DISCORD_ID = " + message.getAuthor().getId());
-                            if (rs.next()) {
-                                message.reply("你已經註冊過了").queue();
-                            } else {
+                    if (registered(Objects.requireNonNull(message.getMember()).getUser().getId())) {
+                        message.reply("你已經註冊過了").queue();
+                    } else {
+                        synchronized (Main.main.connection) {
+                            try {
+                                Statement stmt = Main.main.connection.createStatement();
                                 stmt.executeUpdate("INSERT INTO PLAYER (DISCORD_ID, DATE_CREATED) " +
                                         "VALUES (" + message.getAuthor().getId() + ", DATE('now'))");
                                 message.reply("註冊完成，祝你玩得愉快").queue();
+                            } catch (SQLException e) {
+                                throw new RuntimeException(e);
                             }
-                            rs.close();
-                            stmt.close();
-                        } catch (SQLException e) {
-                            throw new RuntimeException(e);
                         }
                     }
             }
