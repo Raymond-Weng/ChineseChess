@@ -41,14 +41,16 @@ public class Main {
                         "POINT INTEGER NOT NULL DEFAULT 1000," +
                         "DATE_CREATED DATE NOT NULL," +
                         "GAME_PLAYING INTEGER DEFAULT NULL," +
-                        "PLAYING_BLACK BOOLEAN DEFAULT NULL)");
+                        "PLAYING_RED BOOLEAN DEFAULT NULL)");
                 stmt.executeUpdate("CREATE TABLE GAME" +
                         "(ID INTEGER PRIMARY KEY AUTOINCREMENT ," +
-                        "BLACK_PLAYER INTEGER NOT NULL," +
                         "RED_PLAYER INTEGER NOT NULL," +
+                        "BLACK_PLAYER INTEGER NOT NULL," +
+                        "TURN_RED BOOLEAN NOT NULL DEFAULT TRUE," +
                         "PROCESS TEXT NOT NULL DEFAULT ''," +
                         "PLAYING BOOLEAN NOT NULL DEFAULT TRUE, " +
-                        "TIME_LIMIT INTEGER NOT NULL DEFAULT 0, " +
+                        "RED_TIMELEFT INTEGER NOT NULL DEFAULT 600, " +
+                        "BLACK_TIMELEFT INTEGER NOT NULL DEFAULT 600, " +
                         "LAST_MOVE INTEGER NOT NULL)");
                 stmt.close();
             }
