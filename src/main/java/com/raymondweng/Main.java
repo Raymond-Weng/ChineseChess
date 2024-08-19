@@ -17,8 +17,6 @@ import java.sql.Statement;
 public class Main {
     public static Main main;
 
-    public final Connection connection;
-
     public static void main(String[] args) throws IOException {
         System.out.print("Input the token: ");
         main = new Main(new BufferedReader(new InputStreamReader(System.in)).readLine());
@@ -31,10 +29,16 @@ public class Main {
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
-        boolean databaseExists = new File("./database/data.db").exists();
+        boolean databaseExists = new File("./database/player.db").exists();
         try {
-            connection = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
-            if (!databaseExists) {
+            if (databaseExists) {
+                Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/game.db");
+                Statement stmt = connection.createStatement();
+                stmt.executeUpdate("DELETE FROM GAME WHERE PLAYING = TRUE");
+                stmt.close();
+                connection.close();
+            }else{
+                Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/player.db");
                 Statement stmt = connection.createStatement();
                 stmt.executeUpdate("CREATE TABLE PLAYER" +
                         "(DISCORD_ID INTEGER PRIMARY KEY NOT NULL ," +
@@ -42,6 +46,11 @@ public class Main {
                         "DATE_CREATED DATE NOT NULL," +
                         "GAME_PLAYING INTEGER DEFAULT NULL," +
                         "PLAYING_RED BOOLEAN DEFAULT NULL)");
+                stmt.close();
+                connection.close();
+
+                connection = DriverManager.getConnection("jdbc:sqlite:./database/game.db");
+                stmt = connection.createStatement();
                 stmt.executeUpdate("CREATE TABLE GAME" +
                         "(ID INTEGER PRIMARY KEY AUTOINCREMENT ," +
                         "RED_PLAYER INTEGER NOT NULL," +
@@ -53,6 +62,7 @@ public class Main {
                         "BLACK_TIMELEFT INTEGER NOT NULL DEFAULT 600, " +
                         "LAST_MOVE INTEGER NOT NULL)");
                 stmt.close();
+                connection.close();
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
