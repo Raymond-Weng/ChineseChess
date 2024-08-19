@@ -32,7 +32,6 @@ public class Game {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return null;
     }
 
     public void startGame(int black, int red) {
