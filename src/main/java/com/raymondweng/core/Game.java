@@ -1,10 +1,12 @@
 package com.raymondweng.core;
 
+import com.raymondweng.Main;
+
 import java.sql.*;
 import java.util.HashMap;
 
 public class Game {
-    private static HashMap<Integer, Game> games = new HashMap<Integer, Game>();
+    private static final HashMap<Integer, Game> games = new HashMap<Integer, Game>();
 
     private final int id;
     private final int red;
@@ -38,11 +40,11 @@ public class Game {
         }
     }
 
-    public static Game startGame(int black, int red) {
+    public static Game startGame(int black, int red, int channelID, int messageID) {
         try {
             Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
             Statement stmt = connection.createStatement();
-            stmt.executeUpdate("INSERT INTO GAME (RED_PLAYER, BLACK_PLAYER, LAST_MOVE)  VALUES (" + red + "," + black + ", STRFTIME('%s', 'now'))");
+            stmt.executeUpdate("INSERT INTO GAME (RED_PLAYER, BLACK_PLAYER, LAST_MOVE, LAST_MESSAGE_CHANNEL)  VALUES (" + red + "," + black + ", STRFTIME('%s', 'now'), " + channelID + ")");
             ResultSet rs = stmt.executeQuery("SELECT ID FROM GAME WHERE BLACK_PLAYER = " + black);
             rs.next();
             String id = rs.getString("ID");
@@ -57,11 +59,29 @@ public class Game {
         return null;
     }
 
-    public static void update(){
-        Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
-        for (Game game : games.values()) {
-            if(game.lastMove != -1 && game.){
+    public static void update() {
+        synchronized (games) {
+            try {
+                Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
+                Statement stmt = connection.createStatement();
+                ResultSet rs = stmt.executeQuery("SELECT STRFTIME('%s', 'now') AS T");
+                int time = rs.getInt("T");
+                rs.close();
+                stmt.close();
+                for (Game game : games.values()) {
+                    if (time - game.lastMove > (game.redPlaying ? game.redTime : game.blackTime)) {
+                        if (game.playing ? game.redPlaying : game.blackTime < 0) {
+                            if (time - game.lastMove > 30) {
+                                stmt = connection.createStatement();
 
+                            }
+                        } else {
+
+                        }
+                    }
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
             }
         }
     }

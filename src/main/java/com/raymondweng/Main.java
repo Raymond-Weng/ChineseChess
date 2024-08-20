@@ -58,9 +58,10 @@ public class Main {
                         "TURN_RED BOOLEAN NOT NULL DEFAULT TRUE," +
                         "PROCESS TEXT NOT NULL DEFAULT ''," +
                         "PLAYING BOOLEAN NOT NULL DEFAULT TRUE, " +
-                        "RED_TIMELEFT INTEGER NOT NULL DEFAULT 900, " +
-                        "BLACK_TIMELEFT INTEGER NOT NULL DEFAULT 900, " +
-                        "LAST_MOVE INTEGER NOT NULL)");
+                        "RED_TIMELEFT INTEGER NOT NULL DEFAULT 600, " +
+                        "BLACK_TIMELEFT INTEGER NOT NULL DEFAULT 600, " +
+                        "LAST_MOVE INTEGER NOT NULL, " +
+                        "LAST_MESSAGE_CHANNEL INTEGER NOT NULL)");
                 stmt.close();
                 connection.close();
             }
