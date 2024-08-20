@@ -40,7 +40,7 @@ public class Game {
 
     public static Game startGame(int black, int red) {
         try {
-            Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/game.db");
+            Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
             Statement stmt = connection.createStatement();
             stmt.executeUpdate("INSERT INTO GAME (RED_PLAYER, BLACK_PLAYER, LAST_MOVE)  VALUES (" + red + "," + black + ", STRFTIME('%s', 'now'))");
             ResultSet rs = stmt.executeQuery("SELECT ID FROM GAME WHERE BLACK_PLAYER = " + black);
@@ -58,6 +58,7 @@ public class Game {
     }
 
     public static void update(){
+        Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
         for (Game game : games.values()) {
             if(game.lastMove != -1 && game.){
 

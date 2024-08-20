@@ -16,10 +16,11 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
     public boolean registered(String id) {
         boolean registered = false;
         try {
-            Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/player.db");
+            Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
             Statement stmt = connection.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT DISCORD_ID FROM PLAYER WHERE DISCORD_ID = " + id);
-            if (rs.next()) {
+            ResultSet rs = stmt.executeQuery("SELECT COUNT(*) AS CNT FROM PLAYER WHERE DISCORD_ID = " + id);
+            rs.next();
+            if (rs.getInt("CNT") > 0) {
                 registered = true;
             }
             rs.close();
@@ -60,7 +61,7 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
                     break;
                 case "%leader-board":
                     try {
-                        Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/player.db");
+                        Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
                         Statement stmt = connection.createStatement();
                         ResultSet rs = stmt.executeQuery("SELECT DISCORD_ID, POINT FROM PLAYER WHERE POINT >= 1200 ORDER BY POINT DESC, DATE_CREATED ASC LIMIT 10");
                         EmbedBuilder e = new EmbedBuilder();
@@ -91,7 +92,7 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
                         message.reply("你已經註冊過了").queue();
                     } else {
                         try {
-                            Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/player.db");
+                            Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
                             Statement stmt = connection.createStatement();
                             stmt.executeUpdate("INSERT INTO PLAYER (DISCORD_ID, DATE_CREATED) " +
                                     "VALUES (" + message.getAuthor().getId() + ", DATE('now'))");

@@ -34,13 +34,13 @@ public class Main {
         boolean databaseExists = new File("./database/player.db").exists();
         try {
             if (databaseExists) {
-                Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/game.db");
+                Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
                 Statement stmt = connection.createStatement();
                 stmt.executeUpdate("DELETE FROM GAME WHERE PLAYING = TRUE");
                 stmt.close();
                 connection.close();
             } else {
-                Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/player.db");
+                Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
                 Statement stmt = connection.createStatement();
                 stmt.executeUpdate("CREATE TABLE PLAYER" +
                         "(DISCORD_ID INTEGER PRIMARY KEY NOT NULL ," +
@@ -49,9 +49,7 @@ public class Main {
                         "GAME_PLAYING INTEGER DEFAULT NULL," +
                         "PLAYING_RED BOOLEAN DEFAULT NULL)");
                 stmt.close();
-                connection.close();
 
-                connection = DriverManager.getConnection("jdbc:sqlite:./database/game.db");
                 stmt = connection.createStatement();
                 stmt.executeUpdate("CREATE TABLE GAME" +
                         "(ID INTEGER PRIMARY KEY AUTOINCREMENT ," +
