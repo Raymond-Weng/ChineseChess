@@ -33,23 +33,6 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
 
     @Override
     public void onEvent(@NotNull GenericEvent genericEvent) {
-        if (genericEvent instanceof GuildVoiceUpdateEvent) {
-            if (((GuildVoiceUpdateEvent) genericEvent).getChannelLeft() != null) {
-                if (!((GuildVoiceUpdateEvent) genericEvent).getChannelLeft().getId().equals("1270560414719279236") && ((GuildVoiceUpdateEvent) genericEvent).getChannelLeft().getMembers().isEmpty()) {
-                    ((GuildVoiceUpdateEvent) genericEvent).getChannelLeft().delete().queue();
-                }
-            }
-            if (((GuildVoiceUpdateEvent) genericEvent).getChannelJoined() != null) {
-                if (((GuildVoiceUpdateEvent) genericEvent).getChannelJoined().getId().equals("1270560414719279236")) {
-                    Objects.requireNonNull(genericEvent.getJDA()
-                                    .getCategoryById("1270560414274687009"))
-                            .createVoiceChannel(((GuildVoiceUpdateEvent) genericEvent).getMember().getUser().getEffectiveName() + "的語音頻道")
-                            .queue(channel -> {
-                                ((GuildVoiceUpdateEvent) genericEvent).getGuild().moveVoiceMember(((GuildVoiceUpdateEvent) genericEvent).getMember(), channel).queue();
-                            });
-                }
-            }
-        }
         if (genericEvent instanceof MessageReceivedEvent && !Objects.requireNonNull(((MessageReceivedEvent) genericEvent).getMember()).getId().equals(genericEvent.getJDA().getSelfUser().getId())) {
             Message message = ((MessageReceivedEvent) genericEvent).getMessage();
             switch (message.getContentRaw().split(" ")[0]) {
@@ -105,6 +88,24 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
                     break;
             }
 
+        }
+
+        if (genericEvent instanceof GuildVoiceUpdateEvent) {
+            if (((GuildVoiceUpdateEvent) genericEvent).getChannelLeft() != null) {
+                if (!((GuildVoiceUpdateEvent) genericEvent).getChannelLeft().getId().equals("1270560414719279236") && ((GuildVoiceUpdateEvent) genericEvent).getChannelLeft().getMembers().isEmpty()) {
+                    ((GuildVoiceUpdateEvent) genericEvent).getChannelLeft().delete().queue();
+                }
+            }
+            if (((GuildVoiceUpdateEvent) genericEvent).getChannelJoined() != null) {
+                if (((GuildVoiceUpdateEvent) genericEvent).getChannelJoined().getId().equals("1270560414719279236")) {
+                    Objects.requireNonNull(genericEvent.getJDA()
+                                    .getCategoryById("1270560414274687009"))
+                            .createVoiceChannel(((GuildVoiceUpdateEvent) genericEvent).getMember().getUser().getEffectiveName() + "的語音頻道")
+                            .queue(channel -> {
+                                ((GuildVoiceUpdateEvent) genericEvent).getGuild().moveVoiceMember(((GuildVoiceUpdateEvent) genericEvent).getMember(), channel).queue();
+                            });
+                }
+            }
         }
     }
 }
