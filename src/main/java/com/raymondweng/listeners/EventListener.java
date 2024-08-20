@@ -1,7 +1,6 @@
 package com.raymondweng.listeners;
 
 
-import com.raymondweng.Main;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.GenericEvent;
