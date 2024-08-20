@@ -10,6 +10,10 @@ public class Game {
     private final int red;
     private final int black;
     private final boolean playing;
+    private int blackTime = 600;
+    private int redTime = 600;
+    private int lastMove = -1;
+    private boolean redPlaying = true;
 
 
     private Game(int id, int red, int black, boolean playing) {
@@ -19,7 +23,7 @@ public class Game {
         this.playing = playing;
     }
 
-    public Game getGame(int id) {
+    public static Game getGame(int id) {
         if (games.containsKey(id)) {
             return games.get(id);
         }
@@ -34,7 +38,7 @@ public class Game {
         }
     }
 
-    public void startGame(int black, int red) {
+    public static Game startGame(int black, int red) {
         try {
             Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/game.db");
             Statement stmt = connection.createStatement();
@@ -49,6 +53,15 @@ public class Game {
             connection.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        }
+        return null;
+    }
+
+    public static void update(){
+        for (Game game : games.values()) {
+            if(game.lastMove != -1 && game.){
+
+            }
         }
     }
 }

@@ -1,8 +1,8 @@
 package com.raymondweng;
 
 import com.raymondweng.listeners.EventListener;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 
 import java.io.BufferedReader;
@@ -16,6 +16,8 @@ import java.sql.Statement;
 
 public class Main {
     public static Main main;
+
+    public final JDA jda;
 
     public static void main(String[] args) throws IOException {
         System.out.print("Input the token: ");
@@ -37,7 +39,7 @@ public class Main {
                 stmt.executeUpdate("DELETE FROM GAME WHERE PLAYING = TRUE");
                 stmt.close();
                 connection.close();
-            }else{
+            } else {
                 Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/player.db");
                 Statement stmt = connection.createStatement();
                 stmt.executeUpdate("CREATE TABLE PLAYER" +
@@ -58,8 +60,8 @@ public class Main {
                         "TURN_RED BOOLEAN NOT NULL DEFAULT TRUE," +
                         "PROCESS TEXT NOT NULL DEFAULT ''," +
                         "PLAYING BOOLEAN NOT NULL DEFAULT TRUE, " +
-                        "RED_TIMELEFT INTEGER NOT NULL DEFAULT 600, " +
-                        "BLACK_TIMELEFT INTEGER NOT NULL DEFAULT 600, " +
+                        "RED_TIMELEFT INTEGER NOT NULL DEFAULT 900, " +
+                        "BLACK_TIMELEFT INTEGER NOT NULL DEFAULT 900, " +
                         "LAST_MOVE INTEGER NOT NULL)");
                 stmt.close();
                 connection.close();
@@ -73,6 +75,6 @@ public class Main {
         jdaBuilder
                 .enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_VOICE_STATES)
                 .addEventListeners(new EventListener());
-        jdaBuilder.build();
+        jda = jdaBuilder.build();
     }
 }
