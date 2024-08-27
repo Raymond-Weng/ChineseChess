@@ -88,7 +88,7 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
                     }
                     break;
                 case "%end":
-                    Game.startGame(1066517249906704524, 1273141316280258613)
+                    Game.startGame("1066517249906704524", "1273141316280258613");
                     Game.getGame(Integer.valueOf(message.getContentRaw().split(" ")[1])).endGame(true, false);
             }
 

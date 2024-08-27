@@ -7,8 +7,8 @@ public class Game {
     private static final HashMap<Integer, Game> games = new HashMap<Integer, Game>();
 
     private final int id;
-    private final int red;
-    private final int black;
+    private final String red;
+    private final String black;
     private final boolean playing;
     private int blackTime = 600;
     private int redTime = 600;
@@ -16,7 +16,7 @@ public class Game {
     private boolean redPlaying = true;
 
 
-    private Game(int id, int red, int black, boolean playing) {
+    private Game(int id, String red, String black, boolean playing) {
         this.id = id;
         this.red = red;
         this.black = black;
@@ -34,8 +34,8 @@ public class Game {
             if(rs.next()) {
                 Game g = new Game(
                         rs.getInt("ID"),
-                        rs.getInt("RED_PLAYER"),
-                        rs.getInt("BLACK_PLAYER"),
+                        rs.getString("RED_PLAYER"),
+                        rs.getString("BLACK_PLAYER"),
                         rs.getBoolean("PLAYING"));
                 rs.close();
                 stmt.close();
@@ -52,7 +52,7 @@ public class Game {
         }
     }
 
-    public static Game startGame(int black, int red) {
+    public static Game startGame(String black, String red) {
         try {
             Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
             Statement stmt = connection.createStatement();
@@ -102,12 +102,10 @@ public class Game {
             Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
             Statement stmt = connection.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT BLACK_PLAYER, RED_PLAYER FROM GAME WHERE ID = '" + id + "'");
-            int black = rs.getInt("BLACK_PLAYER");
-            int red = rs.getInt("RED_PLAYER");
-            int db = (int) (16 * ((redWin ? 0 : (blackWin ? 1 : 0.5)) - (1 / (1 + Math.pow(10, (red - black) / 400d)))));
-            int dr = (int) (16 * ((redWin ? 1 : (blackWin ? 0 : 0.5)) - (1 / (1 + Math.pow(10, (black - red) / 400d)))));
-            black += db;
-            red += dr;
+            int b = rs.getInt("BLACK_PLAYER");
+            int r = rs.getInt("RED_PLAYER");
+            int db = (int) (16 * ((redWin ? 0 : (blackWin ? 1 : 0.5)) - (1 / (1 + Math.pow(10, (r - b) / 400d)))));
+            int dr = (int) (16 * ((redWin ? 1 : (blackWin ? 0 : 0.5)) - (1 / (1 + Math.pow(10, (b - r) / 400d)))));
             rs.close();
             stmt.executeUpdate("UPDATE PLAYER SET GAME_PLAYING = NULL, PLAYING_RED = NULL WHERE DISCORD_ID = " + red + " OR DISCORD_ID = " + black);
             stmt.executeUpdate("UPDATE PLAYER SET POINT = POINT + " + db + " WHERE DISCORD_ID = " + black);
