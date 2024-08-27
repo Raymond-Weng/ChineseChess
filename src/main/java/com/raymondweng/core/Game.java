@@ -1,7 +1,5 @@
 package com.raymondweng.core;
 
-import com.raymondweng.Main;
-
 import java.sql.*;
 import java.util.HashMap;
 
@@ -70,13 +68,10 @@ public class Game {
                 stmt.close();
                 for (Game game : games.values()) {
                     if (time - game.lastMove > (game.redPlaying ? game.redTime : game.blackTime)) {
-                        if (game.playing ? game.redPlaying : game.blackTime < 0) {
+                        if ((game.redPlaying ? game.redTime : game.blackTime) < 0) {
                             if (time - game.lastMove > 30) {
-                                stmt = connection.createStatement();
-
+                                game.endGame(!game.redPlaying);
                             }
-                        } else {
-
                         }
                     }
                 }
@@ -84,5 +79,9 @@ public class Game {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    public void endGame(boolean redWin) {
+
     }
 }
