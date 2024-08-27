@@ -28,9 +28,9 @@ public class Game {
             return games.get(id);
         }
         try {
-            Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/player.db");
+            Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
             Statement stmt = connection.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM games WHERE ID = " + id);
+            ResultSet rs = stmt.executeQuery("SELECT * FROM GAME WHERE ID = " + id);
             if(rs.next()) {
                 Game g = new Game(
                         rs.getInt("ID"),
@@ -106,11 +106,12 @@ public class Game {
             int r = rs.getInt("RED_PLAYER");
             int db = (int) (16 * ((redWin ? 0 : (blackWin ? 1 : 0.5)) - (1 / (1 + Math.pow(10, (r - b) / 400d)))));
             int dr = (int) (16 * ((redWin ? 1 : (blackWin ? 0 : 0.5)) - (1 / (1 + Math.pow(10, (b - r) / 400d)))));
+            System.out.println(db + " " + dr);
             rs.close();
             stmt.executeUpdate("UPDATE PLAYER SET GAME_PLAYING = NULL, PLAYING_RED = NULL WHERE DISCORD_ID = " + red + " OR DISCORD_ID = " + black);
             stmt.executeUpdate("UPDATE PLAYER SET POINT = POINT + " + db + " WHERE DISCORD_ID = " + black);
             stmt.executeUpdate("UPDATE PLAYER SET POINT = POINT + " + dr + " WHERE DISCORD_ID = " + red);
-            stmt.executeUpdate("UPDATE GAME SET GAME_PLAYING = FALSE WHERE ID = " + id);
+            stmt.executeUpdate("UPDATE GAME SET PLAYING = FALSE WHERE ID = " + id);
             stmt.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
