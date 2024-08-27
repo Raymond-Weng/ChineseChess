@@ -75,6 +75,7 @@ public class Game {
                         }
                     }
                 }
+                connection.close();
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
