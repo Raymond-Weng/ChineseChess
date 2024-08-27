@@ -41,7 +41,7 @@ public class Main {
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
-        boolean databaseExists = new File("./database/player.db").exists();
+        boolean databaseExists = new File("./database/data.db").exists();
         try {
             if (databaseExists) {
                 Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
