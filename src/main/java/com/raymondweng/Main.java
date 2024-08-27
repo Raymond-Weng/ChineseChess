@@ -1,5 +1,6 @@
 package com.raymondweng;
 
+import com.raymondweng.core.Game;
 import com.raymondweng.listeners.EventListener;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -22,6 +23,15 @@ public class Main {
     public static void main(String[] args) throws IOException {
         System.out.print("Input the token: ");
         main = new Main(new BufferedReader(new InputStreamReader(System.in)).readLine());
+
+        while(true){
+            Game.update();
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     public Main(String token) {
