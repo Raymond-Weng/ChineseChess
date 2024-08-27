@@ -58,9 +58,6 @@ public class Main {
                         "DATE_CREATED DATE NOT NULL," +
                         "GAME_PLAYING INTEGER DEFAULT NULL," +
                         "PLAYING_RED BOOLEAN DEFAULT NULL)");
-                stmt.close();
-
-                stmt = connection.createStatement();
                 stmt.executeUpdate("CREATE TABLE GAME" +
                         "(ID INTEGER PRIMARY KEY AUTOINCREMENT ," +
                         "RED_PLAYER INTEGER NOT NULL," +
@@ -70,8 +67,7 @@ public class Main {
                         "PLAYING BOOLEAN NOT NULL DEFAULT TRUE, " +
                         "RED_TIMELEFT INTEGER NOT NULL DEFAULT 600, " +
                         "BLACK_TIMELEFT INTEGER NOT NULL DEFAULT 600, " +
-                        "LAST_MOVE INTEGER NOT NULL, " +
-                        "LAST_MESSAGE_CHANNEL INTEGER NOT NULL)");
+                        "LAST_MOVE INTEGER NOT NULL)");
                 stmt.close();
                 connection.close();
             }
