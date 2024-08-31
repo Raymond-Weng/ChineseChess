@@ -10,6 +10,8 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.*;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
@@ -93,7 +95,8 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
 
         if (genericEvent instanceof GuildVoiceUpdateEvent) {
             if (((GuildVoiceUpdateEvent) genericEvent).getChannelLeft() != null) {
-                if (!((GuildVoiceUpdateEvent) genericEvent).getChannelLeft().getId().equals("1270560414719279236") && ((GuildVoiceUpdateEvent) genericEvent).getChannelLeft().getMembers().isEmpty()) {
+                List<String> delectProtect = Arrays.asList("1270560414719279236", "1279362956848529442", "1279333695265833001");
+                if (!delectProtect.contains(((GuildVoiceUpdateEvent) genericEvent).getChannelLeft().getId()) && ((GuildVoiceUpdateEvent) genericEvent).getChannelLeft().getMembers().isEmpty()) {
                     ((GuildVoiceUpdateEvent) genericEvent).getChannelLeft().delete().queue();
                 }
             }
