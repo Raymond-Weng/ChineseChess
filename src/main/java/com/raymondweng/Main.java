@@ -10,22 +10,41 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 public class Main {
     public static Main main;
 
     public final JDA jda;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         System.out.print("Input the token: ");
-        main = new Main(new BufferedReader(new InputStreamReader(System.in)).readLine());
+        try {
+            main = new Main(new BufferedReader(new InputStreamReader(System.in)).readLine());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
+        int cnt = 290;
         while(true){
             Game.update();
+            if(cnt == 300){
+                try {
+                    Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
+                    Statement statement = connection.createStatement();
+                    ResultSet resultSet = statement.executeQuery("SELECT COUNT(*) FROM PLAYER");
+                    Main.main.jda.getVoiceChannelById("1279333408010539052").getManager().setName("已註冊人數：" + resultSet.getString(1)).queue();
+                    Main.main.jda.getVoiceChannelById("1279333695265833001").getManager().setName("對戰中對局數：" + Game.playingGamesCount()).queue();
+                    cnt = 0;
+                    resultSet.close();
+                    statement.close();
+                    connection.close();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }else{
+                cnt++;
+            }
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {

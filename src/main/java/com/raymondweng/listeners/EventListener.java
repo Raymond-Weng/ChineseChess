@@ -52,7 +52,7 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
                         int cnt = 0;
                         while (rs.next()) {
                             cnt++;
-                            e.addField("第" + cnt + "名", "<@" + rs.getString("DISCORD_ID") + "> (" + rs.getString("POINT") + "分)\n", false);
+                            e.addField("第" + cnt + "名", "<@" + rs.getString("DISCORD_ID") + "> (" + rs.getString("POINT") + ")\n", false);
                         }
                         while (cnt < 10) {
                             cnt++;

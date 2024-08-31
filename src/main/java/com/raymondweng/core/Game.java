@@ -23,6 +23,10 @@ public class Game {
         this.playing = playing;
     }
 
+    public static int playingGamesCount(){
+        return games.size();
+    }
+
     public static Game getGame(int id) {
         if (games.containsKey(id)) {
             return games.get(id);
