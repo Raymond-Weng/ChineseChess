@@ -25,10 +25,10 @@ public class Main {
             throw new RuntimeException(e);
         }
 
-        int cnt = 290;
+        int cnt = 0;
         while(true){
             Game.update();
-            if(cnt == 300){
+            if(cnt == 60){
                 try {
                     Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
                     Statement statement = connection.createStatement();
