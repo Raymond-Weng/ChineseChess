@@ -86,7 +86,8 @@ public class Main {
                         "PLAYING BOOLEAN NOT NULL DEFAULT TRUE, " +
                         "RED_TIMELEFT INTEGER NOT NULL DEFAULT 600, " +
                         "BLACK_TIMELEFT INTEGER NOT NULL DEFAULT 600, " +
-                        "LAST_MOVE INTEGER NOT NULL)");
+                        "LAST_MOVE INTEGER NOT NULL," +
+                        "END_REASON TEXT DEFAULT NULL)");
                 stmt.close();
                 connection.close();
             }

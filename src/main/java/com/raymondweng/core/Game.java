@@ -23,7 +23,7 @@ public class Game {
         this.playing = playing;
     }
 
-    public static int playingGamesCount(){
+    public static int playingGamesCount() {
         return games.size();
     }
 
@@ -35,7 +35,7 @@ public class Game {
             Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
             Statement stmt = connection.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT * FROM GAME WHERE ID = " + id);
-            if(rs.next()) {
+            if (rs.next()) {
                 Game g = new Game(
                         rs.getInt("ID"),
                         rs.getString("RED_PLAYER"),
@@ -45,7 +45,7 @@ public class Game {
                 stmt.close();
                 connection.close();
                 return g;
-            }else{
+            } else {
                 rs.close();
                 stmt.close();
                 connection.close();
@@ -86,12 +86,8 @@ public class Game {
                 rs.close();
                 stmt.close();
                 for (Game game : games.values()) {
-                    if (time - game.lastMove > (game.redPlaying ? game.redTime : game.blackTime)) {
-                        if ((game.redPlaying ? game.redTime : game.blackTime) < 0) {
-                            if (time - game.lastMove > 30) {
-                                game.endGame(!game.redPlaying, game.redPlaying);
-                            }
-                        }
+                    if (time - game.lastMove > ((game.redPlaying ? game.redTime : game.blackTime) >= 0 ? 180 : 60)) {
+                        game.endGame(!game.redPlaying, game.redPlaying, "用盡步時");
                     }
                 }
                 connection.close();
@@ -101,7 +97,7 @@ public class Game {
         }
     }
 
-    public void endGame(boolean redWin, boolean blackWin) {
+    public void endGame(boolean redWin, boolean blackWin, String reason) {
         try {
             Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
             Statement stmt = connection.createStatement();
@@ -122,7 +118,7 @@ public class Game {
             stmt.executeUpdate("UPDATE PLAYER SET GAME_PLAYING = NULL, PLAYING_RED = NULL WHERE DISCORD_ID = " + red + " OR DISCORD_ID = " + black);
             stmt.executeUpdate("UPDATE PLAYER SET POINT = POINT + " + db + " WHERE DISCORD_ID = " + black);
             stmt.executeUpdate("UPDATE PLAYER SET POINT = POINT + " + dr + " WHERE DISCORD_ID = " + red);
-            stmt.executeUpdate("UPDATE GAME SET PLAYING = FALSE WHERE ID = " + id);
+            stmt.executeUpdate("UPDATE GAME SET PLAYING = FALSE, END_REASON = '" + reason +"' WHERE ID = " + id);
             stmt.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
