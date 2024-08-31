@@ -1,7 +1,7 @@
 package com.raymondweng.listeners;
 
 
-import com.raymondweng.core.Game;
+import com.raymondweng.Main;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.GenericEvent;
@@ -89,6 +89,17 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
                         }
                     }
                     break;
+                case "%invite":
+                    if (!registered(message.getMember().getUser().getId())) {
+                        message.reply("請先註冊後再進行遊戲，如需更多資訊請使用`%help`指令").queue();
+                        break;
+                    }
+                    if (message.getContentRaw().split(" ").length >= 2 && !message.getContentRaw().split(" ")[1].matches("<\\d*>") && Main.main.jda.getUserById(message.getContentRaw().split(" ")[1].substring(2, message.getContentRaw().split(" ")[1].length()-1)) != null) {
+                        message.reply("收到邀請，功能開發中所以還沒有效果，感謝").queue();
+                    } else {
+                        message.reply("用法：`%invite <對手>`，在<對手>那邊請標註一個人").queue();
+
+                    }
             }
 
         }
