@@ -33,7 +33,7 @@ public class Main {
                     Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
                     Statement statement = connection.createStatement();
                     ResultSet resultSet = statement.executeQuery("SELECT COUNT(*) FROM PLAYER");
-                    Main.main.jda.getVoiceChannelById("1279333408010539052").getManager().setName("已註冊人數：" + resultSet.getString(1)).queue();
+                    Main.main.jda.getVoiceChannelById("1279362956848529442").getManager().setName("已註冊人數：" + resultSet.getString(1)).queue();
                     Main.main.jda.getVoiceChannelById("1279333695265833001").getManager().setName("對戰中對局數：" + Game.playingGamesCount()).queue();
                     cnt = 0;
                     resultSet.close();
