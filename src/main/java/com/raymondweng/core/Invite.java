@@ -2,13 +2,11 @@ package com.raymondweng.core;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
 public class Invite {
     private static final Map<String, String> sentInvites = new HashMap<>(); //<inviter, invitee>
     private static final Map<String, Map<String, Invite>> invites = new HashMap<>(); //<invitee, <inviter, invite>>
 
-    private boolean alive = true;
     public final String inviter;
     public final String invitee;
 
@@ -62,19 +60,14 @@ public class Invite {
                 } else {
                     invites.remove(invitee);
                 }
-                alive = false;
             }
         }
     }
 
-    public boolean isAlive() {
-        return alive;
-    }
-
-    public Game accept(){
+    public Game accept() {
         invites.get(invitee).values().forEach(Invite::remove);
         boolean inviterRed = Math.random() < 0.5;
-        return Game.startGame(inviterRed?inviter:invitee, inviterRed?invitee:inviter);
+        return Game.startGame(inviterRed ? inviter : invitee, inviterRed ? invitee : inviter);
     }
 
 }

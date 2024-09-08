@@ -9,7 +9,7 @@ import java.sql.*;
 import java.util.HashMap;
 
 public class Game {
-    private static final HashMap<Integer, Game> games = new HashMap<Integer, Game>();
+    private static final HashMap<Integer, Game> games = new HashMap<>();
 
     private final int id;
     private final String red;
@@ -109,7 +109,8 @@ public class Game {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return new Game(id, red, black, true);
+        games.put(id, new Game(id, red, black, true));
+        return games.get(id);
     }
 
     public static void update() {
@@ -156,12 +157,13 @@ public class Game {
             stmt.executeUpdate("UPDATE PLAYER SET POINT = POINT + " + dr + " WHERE DISCORD_ID = " + red);
             stmt.executeUpdate("UPDATE GAME SET PLAYING = FALSE, END_REASON = '" + reason + "' WHERE ID = " + id);
             stmt.close();
+            connection.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public String getMessage(){
+    public String getMessage() {
         //TODO message
         return "The message haven't been written yet";
     }
