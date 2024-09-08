@@ -26,9 +26,9 @@ public class Main {
         }
 
         int cnt = 0;
-        while(true){
+        while (true) {
             Game.update();
-            if(cnt == 60){
+            if (cnt == 60) {
                 try {
                     Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
                     Statement statement = connection.createStatement();
@@ -42,7 +42,7 @@ public class Main {
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
                 }
-            }else{
+            } else {
                 cnt++;
             }
             try {

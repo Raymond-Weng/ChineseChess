@@ -43,17 +43,17 @@ public class Game {
         this.black = black;
         this.playing = playing;
 
-        for(int i = 0; i < 2; i++){
-            positions[i][0][0] = new Position(4, i*9);
-            for(int r = 0; r < 2; r++){
-                positions[i][1][r] = new Position(3+(r*2), i*9);
-                positions[i][2][r] = new Position(2+(r*4), i*9);
-                positions[i][3][r] = new Position(1+(r*6), i*9);
-                positions[i][4][r] = new Position(r*8, i*9);
-                positions[i][5][r] = new Position(1+(r*6), 2+(i*5));
+        for (int i = 0; i < 2; i++) {
+            positions[i][0][0] = new Position(4, i * 9);
+            for (int r = 0; r < 2; r++) {
+                positions[i][1][r] = new Position(3 + (r * 2), i * 9);
+                positions[i][2][r] = new Position(2 + (r * 4), i * 9);
+                positions[i][3][r] = new Position(1 + (r * 6), i * 9);
+                positions[i][4][r] = new Position(r * 8, i * 9);
+                positions[i][5][r] = new Position(1 + (r * 6), 2 + (i * 5));
             }
-            for(int r = 0; r < 5; r++){
-                positions[i][6][r] = new Position(r*2, 3+(i*3));
+            for (int r = 0; r < 5; r++) {
+                positions[i][6][r] = new Position(r * 2, 3 + (i * 3));
             }
         }
     }
@@ -153,7 +153,7 @@ public class Game {
             stmt.executeUpdate("UPDATE PLAYER SET GAME_PLAYING = NULL, PLAYING_RED = NULL WHERE DISCORD_ID = " + red + " OR DISCORD_ID = " + black);
             stmt.executeUpdate("UPDATE PLAYER SET POINT = POINT + " + db + " WHERE DISCORD_ID = " + black);
             stmt.executeUpdate("UPDATE PLAYER SET POINT = POINT + " + dr + " WHERE DISCORD_ID = " + red);
-            stmt.executeUpdate("UPDATE GAME SET PLAYING = FALSE, END_REASON = '" + reason +"' WHERE ID = " + id);
+            stmt.executeUpdate("UPDATE GAME SET PLAYING = FALSE, END_REASON = '" + reason + "' WHERE ID = " + id);
             stmt.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -162,9 +162,9 @@ public class Game {
 
     public File toImage() throws IOException {
         File file = new File("./maps/" + this + ".png");
-        if(file.exists()){
+        if (file.exists()) {
             return file;
-        }else{
+        } else {
             BufferedImage image = new BufferedImage(1000, 1000, BufferedImage.TYPE_INT_RGB);
             Graphics2D g2d = image.createGraphics();
             g2d.drawImage(ImageIO.read(new File("./maps/board.png")), 0, 0, null);
@@ -175,19 +175,19 @@ public class Game {
         }
     }
 
-    public String toString(){
+    public String toString() {
         StringBuilder res = new StringBuilder();
 
-        for(int i = 0; i < 2; i++){
+        for (int i = 0; i < 2; i++) {
             res.append(posToString(positions[i][0][0]));
-            for(int r = 0; r < 2; r++){
+            for (int r = 0; r < 2; r++) {
                 res.append(posToString(positions[i][1][r]));
                 res.append(posToString(positions[i][2][r]));
                 res.append(posToString(positions[i][3][r]));
                 res.append(posToString(positions[i][4][r]));
                 res.append(posToString(positions[i][5][r]));
             }
-            for(int r = 0; r < 5; r++){
+            for (int r = 0; r < 5; r++) {
                 res.append(posToString(positions[i][6][r]));
             }
         }
@@ -195,7 +195,7 @@ public class Game {
         return res.toString();
     }
 
-    private String posToString(Position pos){
+    private String posToString(Position pos) {
         return pos == null ? "n" : pos.toString();
     }
 }
