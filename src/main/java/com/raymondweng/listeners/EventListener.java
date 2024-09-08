@@ -2,12 +2,14 @@ package com.raymondweng.listeners;
 
 
 import com.raymondweng.Main;
+import com.raymondweng.core.Invite;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.api.utils.FileUpload;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.*;
@@ -93,22 +95,36 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
                 case "%invite":
                     if (!registered(message.getMember().getUser().getId())) {
                         message.reply("請先註冊後再進行遊戲，如需更多資訊請使用`%help`指令").queue();
-                        break;
-                    }
-                    if (message.getContentRaw().split(" ").length >= 2 && !message.getContentRaw().split(" ")[1].matches("<\\d*>") && Main.main.jda.getUserById(message.getContentRaw().split(" ")[1].substring(2, message.getContentRaw().split(" ")[1].length()-1)) != null) {
-                        message.reply("收到邀請，功能開發中所以還沒有效果，感謝").queue();
                     } else {
-                        message.reply("用法：`%invite <對手>`，在<對手>那邊請標註一個人").queue();
-
+                        if (message.getContentRaw().split(" ").length >= 2 && !message.getContentRaw().split(" ")[1].matches("<\\d*>")) {
+                            if (!registered(message.getContentRaw().split(" ")[1].substring(2, message.getContentRaw().split(" ")[1].length() - 1))) {
+                                message.reply("你邀請的使用者還沒註冊，請先請他註冊後再邀請他").queue();
+                            } else {
+                                Invite inv = Invite.createInvite(message.getMember().getId(), message.getContentRaw().split(" ")[1].substring(2, message.getContentRaw().split(" ")[1].length() - 1));
+                                if (inv == null) {
+                                    message.reply("你已經發送邀請了，請等待回復或是刪除上一個邀請")
+                                            .addEmbeds(new EmbedBuilder()
+                                                    .addField("目前正在邀請...", "<@" + Invite.getInviteByInviter(message.getMember().getId()).invitee + ">", true)
+                                                    .build())
+                                            .queue();
+                                } else {
+                                    message.reply("邀請成功").queue();
+                                    message.getChannel().sendMessage("<@" + inv.invitee + "> 您已收到來自 <@" + message.getMember().getId() + "> 的邀請，請使用`%accept <邀請者>`接受挑戰").queue();
+                                }
+                            }
+                        } else {
+                            message.reply("用法：`%invite <對手>`，在<對手>那邊請標註一個人").queue();
+                        }
                     }
+                    break;
             }
 
         }
 
         if (genericEvent instanceof GuildVoiceUpdateEvent) {
             if (((GuildVoiceUpdateEvent) genericEvent).getChannelLeft() != null) {
-                List<String> delectProtect = Arrays.asList("1270560414719279236", "1279362956848529442", "1279333695265833001");
-                if (!delectProtect.contains(((GuildVoiceUpdateEvent) genericEvent).getChannelLeft().getId()) && ((GuildVoiceUpdateEvent) genericEvent).getChannelLeft().getMembers().isEmpty()) {
+                List<String> deleteProtect = Arrays.asList("1270560414719279236", "1279362956848529442", "1279333695265833001");
+                if (!deleteProtect.contains(((GuildVoiceUpdateEvent) genericEvent).getChannelLeft().getId()) && ((GuildVoiceUpdateEvent) genericEvent).getChannelLeft().getMembers().isEmpty()) {
                     ((GuildVoiceUpdateEvent) genericEvent).getChannelLeft().delete().queue();
                 }
             }
