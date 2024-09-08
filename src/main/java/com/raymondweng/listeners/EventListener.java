@@ -90,23 +90,55 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
                     }
                     break;
                 case "%invite":
-                    if (!registered(message.getMember().getUser().getId())) {
+                    if (!registered(message.getMember().getId())) {
                         message.reply("請先註冊後再進行遊戲，如需更多資訊請使用`%help`指令").queue();
                     } else {
                         if (message.getContentRaw().split(" ").length >= 2 && !message.getContentRaw().split(" ")[1].matches("<\\d*>")) {
                             if (!registered(message.getContentRaw().split(" ")[1].substring(2, message.getContentRaw().split(" ")[1].length() - 1))) {
                                 message.reply("你邀請的使用者還沒註冊，請先請他註冊後再邀請他").queue();
+                            } else if (message.getMember().getId().equals(message.getContentRaw().split(" ")[1].substring(2, message.getContentRaw().split(" ")[1].length()-1))) {
+                                message.reply("不能邀請自己喔").queue();
                             } else {
-                                Invite inv = Invite.createInvite(message.getMember().getId(), message.getContentRaw().split(" ")[1].substring(2, message.getContentRaw().split(" ")[1].length() - 1));
-                                if (inv == null) {
-                                    message.reply("你已經發送邀請了，請等待回復或是刪除上一個邀請")
-                                            .addEmbeds(new EmbedBuilder()
-                                                    .addField("目前正在邀請...", "<@" + Invite.getInviteByInviter(message.getMember().getId()).invitee + ">", true)
-                                                    .build())
-                                            .queue();
+                                boolean inviteePlaying = true;
+                                try {
+                                    Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
+                                    Statement statement = connection.createStatement();
+                                    ResultSet resultSet = statement.executeQuery("SELECT GAME_PLAYING FROM PLAYER WHERE DISCORD_ID = " + message.getMember().getUser().getId());
+                                    resultSet.next();
+                                    inviteePlaying = resultSet.getString("GAME_PLAYING") != null;
+                                    resultSet.close();
+                                    statement.close();
+                                    connection.close();
+                                } catch (SQLException e) {
+                                    throw new RuntimeException(e);
+                                }
+                                if (inviteePlaying) {
+                                    message.reply("被邀請的人正在另一個對局，請等待對局結束後再邀請").queue();
                                 } else {
-                                    message.reply("邀請成功").queue();
-                                    message.getChannel().sendMessage("<@" + inv.invitee + "> 您已收到來自 <@" + message.getMember().getId() + "> 的邀請，請使用`%accept <邀請者>`接受挑戰").queue();
+                                    int point = 0;
+                                    try {
+                                        Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
+                                        Statement statement = connection.createStatement();
+                                        ResultSet resultSet = statement.executeQuery("SELECT POINT FROM PLAYER WHERE DISCORD_ID = " + message.getMember().getUser().getId());
+                                        resultSet.next();
+                                        point = resultSet.getInt("POINT");
+                                        resultSet.close();
+                                        statement.close();
+                                        connection.close();
+                                    } catch (SQLException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                    Invite inv = Invite.createInvite(message.getMember().getId(), message.getContentRaw().split(" ")[1].substring(2, message.getContentRaw().split(" ")[1].length() - 1));
+                                    if (inv == null) {
+                                        message.reply("你已經發送邀請了，請等待回復或是刪除上一個邀請")
+                                                .addEmbeds(new EmbedBuilder()
+                                                        .addField("目前正在邀請...", "<@" + Invite.getInviteByInviter(message.getMember().getId()).invitee + ">", true)
+                                                        .build())
+                                                .queue();
+                                    } else {
+                                        message.reply("邀請成功").queue();
+                                        message.getChannel().sendMessage("<@" + inv.invitee + "> 您已收到來自 <@" + message.getMember().getId() + "> (" + point + ")的邀請，請使用`%accept <邀請者>`接受挑戰，或是使用`%reject <邀請者>`來拒絕").queue();
+                                    }
                                 }
                             }
                         } else {
@@ -114,6 +146,13 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
                         }
                     }
                     break;
+                case "%cancel":
+                    if (Invite.getInviteByInviter(message.getMember().getId()) == null) {
+                        message.reply("你目前沒有正在邀請的人").queue();
+                    } else {
+                        Invite.getInviteByInviter(message.getMember().getId()).remove();
+                        message.reply("邀請已取消").queue();
+                    }
             }
 
         }

@@ -1,6 +1,5 @@
 package com.raymondweng.core;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,14 +37,18 @@ public class Invite {
     public static Invite getInviteByInviter(String inviter) {
         synchronized (sentInvites) {
             synchronized (invites) {
-                return invites.get(sentInvites.get(inviter)).get(inviter);
+                if (sentInvites.containsKey(inviter)) {
+                    return invites.get(sentInvites.get(inviter)).get(inviter);
+                } else {
+                    return null;
+                }
             }
         }
     }
 
-    public static Collection<Invite> getInviteByInvitee(String invitee) {
+    public static Map<String, Invite> getInviteByInvitee(String invitee) {
         synchronized (invites) {
-            return invites.get(invitee).values();
+            return invites.get(invitee);
         }
     }
 
@@ -54,7 +57,9 @@ public class Invite {
             synchronized (invites) {
                 sentInvites.remove(inviter);
                 if (invites.get(invitee).size() > 1) {
-                    invites.get(invitee).remove(this);
+                    invites.get(invitee).remove(inviter);
+                } else {
+                    invites.remove(invitee);
                 }
                 alive = false;
             }
