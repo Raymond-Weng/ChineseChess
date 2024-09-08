@@ -66,6 +66,7 @@ public class Main {
                 Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
                 Statement stmt = connection.createStatement();
                 stmt.executeUpdate("DELETE FROM GAME WHERE PLAYING = TRUE");
+                stmt.executeUpdate("UPDATE PLAYER SET GAME_PLAYING = NULL, PLAYING_RED = NULL");
                 stmt.close();
                 connection.close();
             } else {

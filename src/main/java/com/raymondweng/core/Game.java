@@ -92,13 +92,14 @@ public class Game {
     }
 
     public static Game startGame(String red, String black) {
+        int id;
         try {
             Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
             Statement stmt = connection.createStatement();
             stmt.executeUpdate("INSERT INTO GAME (RED_PLAYER, BLACK_PLAYER, LAST_MOVE)  VALUES (" + red + "," + black + ", STRFTIME('%s', 'now'))");
             ResultSet rs = stmt.executeQuery("SELECT ID FROM GAME WHERE BLACK_PLAYER = " + black);
             rs.next();
-            String id = rs.getString("ID");
+            id = rs.getInt("ID");
             rs.close();
             stmt.executeUpdate("UPDATE PLAYER SET GAME_PLAYING = " + id + " WHERE DISCORD_ID = " + red + " OR DISCORD_ID = " + black);
             stmt.executeUpdate("UPDATE PLAYER SET PLAYING_RED = TRUE WHERE DISCORD_ID = " + red);
@@ -108,7 +109,7 @@ public class Game {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return null;
+        return new Game(id, red, black, true);
     }
 
     public static void update() {
