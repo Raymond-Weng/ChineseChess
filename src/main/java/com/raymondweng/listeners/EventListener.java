@@ -163,7 +163,7 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
                         message.reply("用法：`" + message.getContentRaw().split(" ")[0] + " <邀請者>`，在<邀請者>那邊請標註一個人").queue();
                     } else if (Invite.getInviteByInvitee(message.getMember().getId()) != null
                             && Invite.getInviteByInvitee(message.getMember().getId()).containsKey(message.getContentRaw().split(" ")[1].substring(2, message.getContentRaw().split(" ")[1].length() - 1))) {
-                        if (message.getContentRaw().split(" ")[1].equals("%accept")) {
+                        if (message.getContentRaw().split(" ")[0].equals("%accept")) {
                             Game game = Invite.getInviteByInvitee(message.getMember().getId()).get(message.getContentRaw().split(" ")[1].substring(2, message.getContentRaw().split(" ")[1].length() - 1)).accept();
                             try {
                                 message.reply(game.getMessage()).addFiles(FileUpload.fromData(game.toImage())).queue();
