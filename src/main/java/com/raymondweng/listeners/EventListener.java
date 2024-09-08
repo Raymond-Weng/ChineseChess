@@ -56,7 +56,7 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
 
     @Override
     public void onEvent(@NotNull GenericEvent genericEvent) {
-        if (genericEvent instanceof MessageReceivedEvent && !Objects.requireNonNull(((MessageReceivedEvent) genericEvent).getMember()).getId().equals(genericEvent.getJDA().getSelfUser().getId())) {
+        if (genericEvent instanceof MessageReceivedEvent && !((MessageReceivedEvent) genericEvent).getMember().getId().equals(genericEvent.getJDA().getSelfUser().getId())) {
             Message message = ((MessageReceivedEvent) genericEvent).getMessage();
             switch (message.getContentRaw().split(" ")[0]) {
                 case "%findUser":
@@ -93,7 +93,7 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
                     message.reply("請前往<#1272745478538264589>確認規則以及使用方式").queue();
                     break;
                 case "%register":
-                    if (registered(Objects.requireNonNull(message.getMember()).getUser().getId())) {
+                    if (registered(message.getMember().getUser().getId())) {
                         message.reply("你已經註冊過了").queue();
                     } else {
                         try {
@@ -197,8 +197,8 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
             }
             if (((GuildVoiceUpdateEvent) genericEvent).getChannelJoined() != null) {
                 if (((GuildVoiceUpdateEvent) genericEvent).getChannelJoined().getId().equals("1270560414719279236")) {
-                    Objects.requireNonNull(genericEvent.getJDA()
-                                    .getCategoryById("1270560414274687009"))
+                    genericEvent.getJDA()
+                                    .getCategoryById("1270560414274687009")
                             .createVoiceChannel(((GuildVoiceUpdateEvent) genericEvent).getMember().getUser().getEffectiveName() + "的語音頻道")
                             .queue(channel -> {
                                 ((GuildVoiceUpdateEvent) genericEvent).getGuild().moveVoiceMember(((GuildVoiceUpdateEvent) genericEvent).getMember(), channel).queue();
