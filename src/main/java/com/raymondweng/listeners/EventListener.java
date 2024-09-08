@@ -37,6 +37,23 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
         return registered;
     }
 
+    public boolean playing(String id){
+        boolean playing = true;
+        try {
+            Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery("SELECT GAME_PLAYING FROM PLAYER WHERE DISCORD_ID = " + id);
+            resultSet.next();
+            playing = resultSet.getString("GAME_PLAYING") != null;
+            resultSet.close();
+            statement.close();
+            connection.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return playing;
+    }
+
     @Override
     public void onEvent(@NotNull GenericEvent genericEvent) {
         if (genericEvent instanceof MessageReceivedEvent && !Objects.requireNonNull(((MessageReceivedEvent) genericEvent).getMember()).getId().equals(genericEvent.getJDA().getSelfUser().getId())) {
@@ -102,20 +119,9 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
                             } else if (message.getMember().getId().equals(message.getContentRaw().split(" ")[1].substring(2, message.getContentRaw().split(" ")[1].length() - 1))) {
                                 message.reply("不能邀請自己喔").queue();
                             } else {
-                                boolean inviteePlaying = true;
-                                try {
-                                    Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
-                                    Statement statement = connection.createStatement();
-                                    ResultSet resultSet = statement.executeQuery("SELECT GAME_PLAYING FROM PLAYER WHERE DISCORD_ID = " + message.getMember().getUser().getId());
-                                    resultSet.next();
-                                    inviteePlaying = resultSet.getString("GAME_PLAYING") != null;
-                                    resultSet.close();
-                                    statement.close();
-                                    connection.close();
-                                } catch (SQLException e) {
-                                    throw new RuntimeException(e);
-                                }
-                                if (inviteePlaying) {
+                                if (playing(message.getMember().getId())) {
+                                    message.reply("你還在遊戲中，不能邀請人喔").queue();
+                                } else if (playing(message.getContentRaw().split(" ")[1].substring(2, message.getContentRaw().split(" ")[1].length() - 1))) {
                                     message.reply("被邀請的人正在另一個對局，請等待對局結束後再邀請").queue();
                                 } else {
                                     int point = 0;
