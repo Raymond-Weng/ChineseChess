@@ -91,7 +91,7 @@ public class Game {
         }
     }
 
-    public static Game startGame(String black, String red) {
+    public static Game startGame(String red, String black) {
         try {
             Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
             Statement stmt = connection.createStatement();
@@ -158,6 +158,11 @@ public class Game {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public String getMessage(){
+        //TODO message
+        return "The message haven't been written yet";
     }
 
     public File toImage() throws IOException {

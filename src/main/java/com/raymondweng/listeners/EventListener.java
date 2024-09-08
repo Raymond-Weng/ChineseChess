@@ -1,14 +1,17 @@
 package com.raymondweng.listeners;
 
 
+import com.raymondweng.core.Game;
 import com.raymondweng.core.Invite;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.utils.FileUpload;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.sql.*;
 import java.util.Arrays;
 import java.util.List;
@@ -96,7 +99,7 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
                         if (message.getContentRaw().split(" ").length >= 2 && !message.getContentRaw().split(" ")[1].matches("<\\d*>")) {
                             if (!registered(message.getContentRaw().split(" ")[1].substring(2, message.getContentRaw().split(" ")[1].length() - 1))) {
                                 message.reply("你邀請的使用者還沒註冊，請先請他註冊後再邀請他").queue();
-                            } else if (message.getMember().getId().equals(message.getContentRaw().split(" ")[1].substring(2, message.getContentRaw().split(" ")[1].length()-1))) {
+                            } else if (message.getMember().getId().equals(message.getContentRaw().split(" ")[1].substring(2, message.getContentRaw().split(" ")[1].length() - 1))) {
                                 message.reply("不能邀請自己喔").queue();
                             } else {
                                 boolean inviteePlaying = true;
@@ -153,6 +156,28 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
                         Invite.getInviteByInviter(message.getMember().getId()).remove();
                         message.reply("邀請已取消").queue();
                     }
+                    break;
+                case "%accept":
+                case "%reject":
+                    if (message.getContentRaw().split(" ").length >= 2 && message.getContentRaw().split(" ")[1].matches("<\\d*>")) {
+                        message.reply("用法：`" + message.getContentRaw().split(" ")[0] + " <邀請者>`，在<邀請者>那邊請標註一個人").queue();
+                    } else if (Invite.getInviteByInvitee(message.getMember().getId()) != null
+                            && Invite.getInviteByInvitee(message.getMember().getId()).containsKey(message.getContentRaw().split(" ")[1].substring(2, message.getContentRaw().split(" ")[1].length() - 1))) {
+                        if (message.getContentRaw().split(" ")[1].equals("%accept")) {
+                            Game game = Invite.getInviteByInvitee(message.getMember().getId()).get(message.getContentRaw().split(" ")[1].substring(2, message.getContentRaw().split(" ")[1].length() - 1)).accept();
+                            try {
+                                message.reply(game.getMessage()).addFiles(FileUpload.fromData(game.toImage())).queue();
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }else {
+                            Invite.getInviteByInvitee(message.getMember().getId()).get(message.getContentRaw().split(" ")[1].substring(2, message.getContentRaw().split(" ")[1].length() - 1)).remove();
+                            message.reply("已拒絕邀請").queue();
+                        }
+                    } else {
+                        message.reply("沒有找到那份邀請，可能是邀請已取消或是其中一方已經進入遊戲").queue();
+                    }
+                    break;
             }
 
         }
