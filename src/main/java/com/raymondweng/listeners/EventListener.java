@@ -7,6 +7,8 @@ import com.raymondweng.core.Invite;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.GenericEvent;
+import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
+import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.utils.FileUpload;
@@ -69,6 +71,23 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
             throw new RuntimeException(e);
         }
         return point;
+    }
+
+    public boolean inServer(String id) {
+        boolean inServer = false;
+        try {
+            Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery("SELECT IN_SERVER FROM PLAYER WHERE DISCORD_ID = " + id);
+            resultSet.next();
+            inServer = resultSet.getBoolean("IN_SERVER");
+            resultSet.close();
+            statement.close();
+            connection.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return inServer;
     }
 
     @Override
@@ -200,6 +219,22 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
                         message.reply("沒有找到那份邀請，可能是邀請已取消或是其中一方已經進入遊戲").queue();
                     }
                     break;
+                case "%data":
+                    if (message.getContentRaw().split(" ").length >= 2 && message.getContentRaw().split(" ")[1].matches("<\\d*>")) {
+                        message.reply("用法：`%data <使用者>`，在<使用者>那邊請標註一個人").queue();
+                    } else if (registered(message.getContentRaw().split(" ")[1].substring(2, message.getContentRaw().split(" ")[1].length() - 1))) {
+                        if (inServer(message.getContentRaw().split(" ")[1].substring(2, message.getContentRaw().split(" ")[1].length() - 1))) {
+                            EmbedBuilder embed = new EmbedBuilder();
+                            Main.main.jda.retrieveUserById(message.getContentRaw().split(" ")[1].substring(2, message.getContentRaw().split(" ")[1].length() - 1)).queue(member -> embed.setTitle(member.getName()));
+                            embed.addField("分數", "" + point(message.getContentRaw().split(" ")[1].substring(2, message.getContentRaw().split(" ")[1].length() - 1)), false);
+                            //TODO %data未完成
+                        } else {
+                            message.reply("該使用者目前似乎不在本伺服器中...").queue();
+                        }
+                    } else {
+                        message.reply("該使用者尚未註冊").queue();
+                    }
+                    break;
             }
 
         }
@@ -219,6 +254,34 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
                             .queue(channel -> {
                                 ((GuildVoiceUpdateEvent) genericEvent).getGuild().moveVoiceMember(((GuildVoiceUpdateEvent) genericEvent).getMember(), channel).queue();
                             });
+                }
+            }
+        }
+
+        if (genericEvent instanceof GuildMemberJoinEvent) {
+            if (registered(((GuildMemberJoinEvent) genericEvent).getMember().getId())) {
+                try {
+                    Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
+                    Statement statement = connection.createStatement();
+                    statement.executeUpdate("UPDATE PLAYER SET IN_SERVER = TRUE WHERE DISCORD_ID = " + ((GuildMemberJoinEvent) genericEvent).getMember().getId());
+                    statement.close();
+                    connection.close();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+
+        if (genericEvent instanceof GuildMemberRemoveEvent) {
+            if (registered(((GuildMemberRemoveEvent) genericEvent).getMember().getId())) {
+                try {
+                    Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
+                    Statement statement = connection.createStatement();
+                    statement.executeUpdate("UPDATE PLAYER SET IN_SERVER = FALSE WHERE DISCORD_ID = " + ((GuildMemberRemoveEvent) genericEvent).getMember().getId());
+                    statement.close();
+                    connection.close();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
                 }
             }
         }

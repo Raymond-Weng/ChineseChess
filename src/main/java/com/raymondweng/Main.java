@@ -77,7 +77,8 @@ public class Main {
                         "POINT INTEGER NOT NULL DEFAULT 1000," +
                         "DATE_CREATED DATE NOT NULL," +
                         "GAME_PLAYING INTEGER DEFAULT NULL," +
-                        "PLAYING_RED BOOLEAN DEFAULT NULL)");
+                        "PLAYING_RED BOOLEAN DEFAULT NULL, " +
+                        "IN_SERVER BOOLEAN NOT NULL DEFAULT TRUE)");
                 stmt.executeUpdate("CREATE TABLE GAME" +
                         "(ID INTEGER PRIMARY KEY AUTOINCREMENT ," +
                         "RED_PLAYER INTEGER NOT NULL," +
