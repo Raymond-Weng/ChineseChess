@@ -120,7 +120,7 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
                         if (!registered(message.getMember().getId())) {
                             message.reply("請先註冊後再進行遊戲，如需更多資訊請使用`%help`指令").queue();
                         } else {
-                            if (message.getContentRaw().split(" ").length >= 2 && !message.getContentRaw().split(" ")[1].matches("<\\d*>")) {
+                            if (message.getContentRaw().split(" ").length >= 2 && message.getContentRaw().split(" ")[1].matches("<@\\d+>")) {
                                 if (!registered(message.getContentRaw().split(" ")[1].substring(2, message.getContentRaw().split(" ")[1].length() - 1))) {
                                     message.reply("你邀請的使用者還沒註冊，請先請他註冊後再邀請他").queue();
                                 } else if (message.getMember().getId().equals(message.getContentRaw().split(" ")[1].substring(2, message.getContentRaw().split(" ")[1].length() - 1))) {
