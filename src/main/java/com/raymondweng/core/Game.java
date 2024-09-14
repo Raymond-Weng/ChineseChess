@@ -161,6 +161,7 @@ public class Game {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+        games.remove(this.id);
     }
 
     public String getMessage() {
