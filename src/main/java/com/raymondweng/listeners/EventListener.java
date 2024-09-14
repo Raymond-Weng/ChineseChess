@@ -79,11 +79,6 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
             if (genericEvent instanceof MessageReceivedEvent && !((MessageReceivedEvent) genericEvent).getMember().getId().equals(genericEvent.getJDA().getSelfUser().getId())) {
                 Message message = ((MessageReceivedEvent) genericEvent).getMessage();
                 switch (message.getContentRaw().split(" ")[0]) {
-                    case "%findUser":
-                        if (message.getChannel().getId().equals("1272745478538264592")) {
-                            message.reply(message.getJDA().getUserById(Long.valueOf(message.getContentRaw().split(" ")[1])).getName()).queue();
-                        }
-                        break;
                     case "%leader-board":
                         Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
                         Statement stmt = connection.createStatement();
