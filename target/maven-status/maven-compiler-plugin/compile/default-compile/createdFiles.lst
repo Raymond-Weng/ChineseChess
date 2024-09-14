@@ -1,4 +1,5 @@
-com\raymondweng\core\Player.class
 com\raymondweng\listeners\EventListener.class
+com\raymondweng\core\Invite.class
 com\raymondweng\core\Game.class
+com\raymondweng\core\Position.class
 com\raymondweng\Main.class
