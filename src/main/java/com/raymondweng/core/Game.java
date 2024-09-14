@@ -9,9 +9,9 @@ import java.sql.*;
 import java.util.HashMap;
 
 public class Game {
-    private static final HashMap<Integer, Game> games = new HashMap<>();
+    private static final HashMap<String, Game> games = new HashMap<>();
 
-    private final int id;
+    private final String id;
     private final String red;
     private final String black;
     private final boolean playing;
@@ -37,7 +37,7 @@ public class Game {
     // type6: 0~4 (from left to right in the beginning)
 
 
-    private Game(int id, String red, String black, boolean playing) {
+    private Game(String id, String red, String black, boolean playing) {
         this.id = id;
         this.red = red;
         this.black = black;
@@ -72,7 +72,7 @@ public class Game {
             ResultSet rs = stmt.executeQuery("SELECT * FROM GAME WHERE ID = " + id);
             if (rs.next()) {
                 Game g = new Game(
-                        rs.getInt("ID"),
+                        rs.getString("ID"),
                         rs.getString("RED_PLAYER"),
                         rs.getString("BLACK_PLAYER"),
                         rs.getBoolean("PLAYING"));
@@ -92,14 +92,14 @@ public class Game {
     }
 
     public static Game startGame(String red, String black) {
-        int id;
+        String id;
         try {
             Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
             Statement stmt = connection.createStatement();
             stmt.executeUpdate("INSERT INTO GAME (RED_PLAYER, BLACK_PLAYER, LAST_MOVE)  VALUES (" + red + "," + black + ", STRFTIME('%s', 'now'))");
             ResultSet rs = stmt.executeQuery("SELECT ID FROM GAME WHERE BLACK_PLAYER = " + black);
             rs.next();
-            id = rs.getInt("ID");
+            id = rs.getString("ID");
             rs.close();
             stmt.executeUpdate("UPDATE PLAYER SET GAME_PLAYING = " + id + " WHERE DISCORD_ID = " + red + " OR DISCORD_ID = " + black);
             stmt.executeUpdate("UPDATE PLAYER SET PLAYING_RED = TRUE WHERE DISCORD_ID = " + red);
