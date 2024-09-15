@@ -76,7 +76,7 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
     @Override
     public void onEvent(@NotNull GenericEvent genericEvent) {
         try {
-            if (genericEvent instanceof MessageReceivedEvent && !((MessageReceivedEvent) genericEvent).getMember().getId().equals(genericEvent.getJDA().getSelfUser().getId())) {
+            if (genericEvent instanceof MessageReceivedEvent && ((MessageReceivedEvent) genericEvent).isFromGuild() && !((MessageReceivedEvent) genericEvent).getMember().getId().equals(genericEvent.getJDA().getSelfUser().getId())) {
                 Message message = ((MessageReceivedEvent) genericEvent).getMessage();
                 switch (message.getContentRaw().split(" ")[0]) {
                     case "%leader-board":
