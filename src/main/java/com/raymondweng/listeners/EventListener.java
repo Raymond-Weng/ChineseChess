@@ -198,10 +198,28 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
                             message.reply("用法：`%data <使用者>`，在<使用者>那邊請標註一個人").queue();
                         } else if (registered(message.getContentRaw().split(" ")[1].substring(2, message.getContentRaw().split(" ")[1].length() - 1))) {
                             if (inServer(message.getContentRaw().split(" ")[1].substring(2, message.getContentRaw().split(" ")[1].length() - 1))) {
-                                EmbedBuilder embed = new EmbedBuilder();
-                                Main.main.jda.retrieveUserById(message.getContentRaw().split(" ")[1].substring(2, message.getContentRaw().split(" ")[1].length() - 1)).queue(member -> embed.setTitle(member.getName()));
-                                embed.addField("分數", "" + point(message.getContentRaw().split(" ")[1].substring(2, message.getContentRaw().split(" ")[1].length() - 1)), false);
-                                //TODO %data未完成
+                                Main.main.jda.retrieveUserById(message.getContentRaw().split(" ")[1].substring(2, message.getContentRaw().split(" ")[1].length() - 1)).queue(user -> {
+                                    try {
+                                        EmbedBuilder embed = new EmbedBuilder();
+                                        embed.setTitle(user.getEffectiveName());
+                                        embed.addField("分數", "" + point(message.getContentRaw().split(" ")[1].substring(2, message.getContentRaw().split(" ")[1].length() - 1)), false);
+                                        embed.addField("狀態", inServer(user.getId()) ? (playing(user.getId()) ? "遊戲中" : "閒置中") : "已離開伺服器", false);
+                                        Connection c = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
+                                        Statement s = c.createStatement();
+                                        ResultSet r = s.executeQuery("SELECT ID FROM GAME WHERE RED_PLAYER = " + user.getId() + " OR BLACK_PLAYER = " + user.getId() + " ORDER BY ID DESC LIMIT 1");
+                                        if(r.next()) {
+                                            embed.addField("最近遊戲（ID）", r.getString("ID"), false);
+                                        }else{
+                                            embed.addField("最近遊戲（ID）", "未曾進行遊戲", false);
+                                        }
+                                        c.close();
+                                        s.close();
+                                        r.close();
+                                        message.replyEmbeds(embed.build()).queue();
+                                    } catch (SQLException ex) {
+                                        err(ex, genericEvent);
+                                    }
+                                });
                             } else {
                                 message.reply("該使用者目前似乎不在本伺服器中...").queue();
                             }
