@@ -177,7 +177,7 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
                         break;
                     case "%accept":
                     case "%reject":
-                        if (message.getContentRaw().split(" ").length >= 2 && message.getContentRaw().split(" ")[1].matches("<\\d*>")) {
+                        if (message.getContentRaw().split(" ").length < 2 || message.getContentRaw().split(" ")[1].matches("<\\d*>")) {
                             message.reply("用法：`" + message.getContentRaw().split(" ")[0] + " <邀請者>`，在<邀請者>那邊請標註一個人").queue();
                         } else if (Invite.getInviteByInvitee(message.getMember().getId()) != null
                                 && Invite.getInviteByInvitee(message.getMember().getId()).containsKey(message.getContentRaw().split(" ")[1].substring(2, message.getContentRaw().split(" ")[1].length() - 1))) {
