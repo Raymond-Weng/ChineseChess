@@ -21,16 +21,12 @@ public class Game {
     private boolean redPlaying = true;
 
     private Position positions[][][] = new Position[2][7][5];
+    private final String name[][] = {
+            {"帥", "仕", "相", "馬", "車", "炮", "兵"},
+            {"將", "士", "象", "馬", "車", "炮", "卒"}
+    };
     // [color][type][number]
     // color: 0->red, 1->black
-    // types:
-    // 0->帥
-    // 1->士
-    // 2->象
-    // 3->馬
-    // 4->車
-    // 5->炮
-    // 6->兵
     // number:
     // type0: 0
     // type1~5: 0~1 (0 is the left one in the beginning
@@ -76,7 +72,7 @@ public class Game {
                         rs.getString("ID"),
                         rs.getString("RED_PLAYER"),
                         rs.getString("BLACK_PLAYER"),
-                        -1, 
+                        -1,
                         rs.getBoolean("PLAYING"));
                 rs.close();
                 stmt.close();
@@ -184,11 +180,34 @@ public class Game {
             BufferedImage image = new BufferedImage(1000, 1000, BufferedImage.TYPE_INT_RGB);
             Graphics2D g2d = image.createGraphics();
             g2d.drawImage(ImageIO.read(new File("./maps/board.png")), 0, 0, null);
+            for (int i = 0; i < 2; i++) {
+                for (int j = 0; j < 7; j++) {
+                    if (j == 0) {
+                        drawPiece(g2d, i, j, 0);
+                    } else {
+                        for (int k = 0; k < (j == 6 ? 5 : 2); k++) {
+                            drawPiece(g2d, i, j, k);
+                        }
+                    }
+                }
+            }
             //TODO draw pieces
             g2d.dispose();
             ImageIO.write(image, "png", file);
             return file;
         }
+    }
+
+    public void drawPiece(Graphics2D graphics2D, int color, int type, int number) {
+        graphics2D.setColor(color == 0 ? Color.red : Color.black);
+        graphics2D.drawOval(55 + positions[color][type][number].x * 100,
+                5 + positions[color][type][number].y * 100,
+                90,
+                90);
+        graphics2D.setFont(new Font("Arial", Font.BOLD, 80));
+        graphics2D.drawString(name[color][type],
+                55 + positions[color][type][number].x * 100,
+                5 + positions[color][type][number].y * 100);
     }
 
     public String toString() {
