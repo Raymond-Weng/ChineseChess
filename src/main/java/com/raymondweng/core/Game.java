@@ -37,11 +37,12 @@ public class Game {
     // type6: 0~4 (from left to right in the beginning)
 
 
-    private Game(String id, String red, String black, boolean playing) {
+    private Game(String id, String red, String black, int time, boolean playing) {
         this.id = id;
         this.red = red;
         this.black = black;
         this.playing = playing;
+        this.lastMove = time;
 
         for (int i = 0; i < 2; i++) {
             positions[i][0][0] = new Position(4, i * 9);
@@ -75,6 +76,7 @@ public class Game {
                         rs.getString("ID"),
                         rs.getString("RED_PLAYER"),
                         rs.getString("BLACK_PLAYER"),
+                        -1, 
                         rs.getBoolean("PLAYING"));
                 rs.close();
                 stmt.close();
@@ -93,10 +95,11 @@ public class Game {
 
     public static Game startGame(String red, String black) {
         String id;
+        int time = -1;
         try {
             Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
             Statement stmt = connection.createStatement();
-            stmt.executeUpdate("INSERT INTO GAME (RED_PLAYER, BLACK_PLAYER, LAST_MOVE)  VALUES (" + red + "," + black + ", STRFTIME('%s', 'now'))");
+            stmt.executeUpdate("INSERT INTO GAME (RED_PLAYER, BLACK_PLAYER)  VALUES (" + red + "," + black + ")");
             ResultSet rs = stmt.executeQuery("SELECT ID FROM GAME WHERE BLACK_PLAYER = " + black);
             rs.next();
             id = rs.getString("ID");
@@ -104,12 +107,15 @@ public class Game {
             stmt.executeUpdate("UPDATE PLAYER SET GAME_PLAYING = " + id + " WHERE DISCORD_ID = " + red + " OR DISCORD_ID = " + black);
             stmt.executeUpdate("UPDATE PLAYER SET PLAYING_RED = TRUE WHERE DISCORD_ID = " + red);
             stmt.executeUpdate("UPDATE PLAYER SET PLAYING_RED = FALSE WHERE DISCORD_ID = " + black);
+            rs = stmt.executeQuery("SELECT STRFTIME('%s', 'now') AS T");
+            rs.next();
+            time = rs.getInt("T");
             stmt.close();
             connection.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        games.put(id, new Game(id, red, black, true));
+        games.put(id, new Game(id, red, black, time, true));
         return games.get(id);
     }
 
@@ -119,6 +125,7 @@ public class Game {
                 Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
                 Statement stmt = connection.createStatement();
                 ResultSet rs = stmt.executeQuery("SELECT STRFTIME('%s', 'now') AS T");
+                rs.next();
                 int time = rs.getInt("T");
                 rs.close();
                 stmt.close();
