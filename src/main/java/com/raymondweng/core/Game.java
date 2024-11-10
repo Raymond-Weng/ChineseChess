@@ -200,14 +200,15 @@ public class Game {
 
     public void drawPiece(Graphics2D graphics2D, int color, int type, int number) {
         graphics2D.setColor(color == 0 ? Color.red : Color.black);
+        graphics2D.setStroke(new BasicStroke(10));
         graphics2D.drawOval(55 + positions[color][type][number].x * 100,
                 5 + positions[color][type][number].y * 100,
                 90,
                 90);
-        graphics2D.setFont(new Font("Arial", Font.BOLD, 80));
+        graphics2D.setFont(new Font("ITALIC", Font.BOLD, 70));
         graphics2D.drawString(name[color][type],
-                55 + positions[color][type][number].x * 100,
-                5 + positions[color][type][number].y * 100);
+                55 + positions[color][type][number].x * 100 + 10,
+                5 + positions[color][type][number].y * 100 + 70);
     }
 
     public String toString() {
