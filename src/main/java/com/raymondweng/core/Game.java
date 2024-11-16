@@ -1,5 +1,7 @@
 package com.raymondweng.core;
 
+import com.raymondweng.Main;
+
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -21,16 +23,7 @@ public class Game {
     private volatile boolean redPlaying = true;
 
     private volatile Position positions[][][] = new Position[2][7][5];
-    private final String name[][] = {
-            {"帥", "仕", "相", "馬", "車", "炮", "兵"},
-            {"將", "士", "象", "馬", "車", "炮", "卒"}
-    };
-    // [color][type][number]
-    // color: 0->red, 1->black
-    // number:
-    // type0: 0
-    // type1~5: 0~1 (0 is the left one in the beginning
-    // type6: 0~4 (from left to right in the beginning)
+
 
 
     private Game(String id, String red, String black, int time, boolean playing) {
@@ -173,42 +166,7 @@ public class Game {
     }
 
     public File toImage() throws IOException {
-        File file = new File("./maps/" + this + ".png");
-        if (file.exists()) {
-            return file;
-        } else {
-            BufferedImage image = new BufferedImage(1000, 1000, BufferedImage.TYPE_INT_RGB);
-            Graphics2D g2d = image.createGraphics();
-            g2d.drawImage(ImageIO.read(new File("./maps/board.png")), 0, 0, null);
-            for (int i = 0; i < 2; i++) {
-                for (int j = 0; j < 7; j++) {
-                    if (j == 0) {
-                        drawPiece(g2d, i, j, 0);
-                    } else {
-                        for (int k = 0; k < (j == 6 ? 5 : 2); k++) {
-                            drawPiece(g2d, i, j, k);
-                        }
-                    }
-                }
-            }
-            //TODO draw pieces
-            g2d.dispose();
-            ImageIO.write(image, "png", file);
-            return file;
-        }
-    }
-
-    public void drawPiece(Graphics2D graphics2D, int color, int type, int number) {
-        graphics2D.setColor(color == 0 ? Color.red : Color.black);
-        graphics2D.setStroke(new BasicStroke(10));
-        graphics2D.drawOval(55 + positions[color][type][number].x * 100,
-                5 + positions[color][type][number].y * 100,
-                90,
-                90);
-        graphics2D.setFont(new Font("ITALIC", Font.BOLD, 70));
-        graphics2D.drawString(name[color][type],
-                55 + positions[color][type][number].x * 100 + 10,
-                5 + positions[color][type][number].y * 100 + 70);
+        return Main.main.getImageFilesHandler().getBoard(positions, toString()).getImage();
     }
 
     public String toString() {

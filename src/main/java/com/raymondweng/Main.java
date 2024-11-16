@@ -1,6 +1,7 @@
 package com.raymondweng;
 
 import com.raymondweng.core.Game;
+import com.raymondweng.handler.ImageFilesHandler;
 import com.raymondweng.listeners.EventListener;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -16,6 +17,7 @@ public class Main {
     public static volatile Main main;
 
     public final JDA jda;
+    public final ImageFilesHandler imageFilesHandler;
 
     public static void main(String[] args) {
         System.out.print("Input the token: ");
@@ -102,5 +104,13 @@ public class Main {
                 .enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_VOICE_STATES)
                 .addEventListeners(new EventListener());
         jda = jdaBuilder.build();
+
+        // start image file handler
+        imageFilesHandler = new ImageFilesHandler();
+        new Thread(imageFilesHandler).start();
+    }
+
+    public ImageFilesHandler getImageFilesHandler() {
+        return imageFilesHandler;
     }
 }
