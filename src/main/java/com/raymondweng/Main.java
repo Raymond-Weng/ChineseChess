@@ -16,6 +16,8 @@ import java.sql.*;
 public class Main {
     public static volatile Main main;
 
+    private boolean running = true;
+
     public final JDA jda;
     public final ImageFilesHandler imageFilesHandler;
 
@@ -28,7 +30,7 @@ public class Main {
         }
 
         int cnt = 0;
-        while (true) {
+        while (main.running) {
             Game.update();
             if (cnt == 60) {
                 try {
@@ -111,6 +113,7 @@ public class Main {
     }
 
     public void stop() {
+        running = false;
         imageFilesHandler.stop();
         jda.shutdown();
     }
