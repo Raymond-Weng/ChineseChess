@@ -13,7 +13,7 @@ import java.io.InputStreamReader;
 import java.sql.*;
 
 public class Main {
-    public static Main main;
+    public static volatile Main main;
 
     public final JDA jda;
 

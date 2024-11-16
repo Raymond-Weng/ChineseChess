@@ -15,12 +15,12 @@ public class Game {
     private final String red;
     private final String black;
     private final boolean playing;
-    private int blackTime = 600;
-    private int redTime = 600;
-    private int lastMove = -1;
-    private boolean redPlaying = true;
+    private volatile int blackTime = 600;
+    private volatile int redTime = 600;
+    private volatile int lastMove = -1;
+    private volatile boolean redPlaying = true;
 
-    private Position positions[][][] = new Position[2][7][5];
+    private volatile Position positions[][][] = new Position[2][7][5];
     private final String name[][] = {
             {"帥", "仕", "相", "馬", "車", "炮", "兵"},
             {"將", "士", "象", "馬", "車", "炮", "卒"}
