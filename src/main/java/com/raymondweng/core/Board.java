@@ -76,7 +76,7 @@ public class Board {
         return deadTime;
     }
 
-    public void remove(){
+    public void remove() {
         file.delete();
     }
 }

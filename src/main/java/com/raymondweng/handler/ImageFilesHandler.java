@@ -14,9 +14,9 @@ public class ImageFilesHandler implements Runnable {
 
     public Board getBoard(Position[][][] positions, String id) throws IOException {
         synchronized (this) {
-            if(boards.containsKey(id)){
+            if (boards.containsKey(id)) {
                 boards.get(id).extendLife();
-            }else{
+            } else {
                 boards.put(id, new Board(positions, id));
             }
         }
@@ -28,11 +28,11 @@ public class ImageFilesHandler implements Runnable {
     public void run() {
         long nextUpdate = System.currentTimeMillis() + 1000;
         while (running) {
-            if(System.currentTimeMillis() > nextUpdate){
+            if (System.currentTimeMillis() > nextUpdate) {
                 nextUpdate += 1000;
-                synchronized (this){
+                synchronized (this) {
                     for (Board board : boards.values()) {
-                        if(System.currentTimeMillis() > board.getDeadTime()){
+                        if (System.currentTimeMillis() > board.getDeadTime()) {
                             board.remove();
                             boards.remove(board.id);
                         }

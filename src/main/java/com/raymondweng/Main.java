@@ -110,6 +110,11 @@ public class Main {
         new Thread(imageFilesHandler).start();
     }
 
+    public void stop() {
+        imageFilesHandler.stop();
+        jda.shutdown();
+    }
+
     public ImageFilesHandler getImageFilesHandler() {
         return imageFilesHandler;
     }

@@ -2,9 +2,6 @@ package com.raymondweng.core;
 
 import com.raymondweng.Main;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.sql.*;
@@ -23,7 +20,6 @@ public class Game {
     private volatile boolean redPlaying = true;
 
     private volatile Position positions[][][] = new Position[2][7][5];
-
 
 
     private Game(String id, String red, String black, int time, boolean playing) {

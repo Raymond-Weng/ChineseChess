@@ -79,6 +79,12 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
             if (genericEvent instanceof MessageReceivedEvent && ((MessageReceivedEvent) genericEvent).isFromGuild() && !((MessageReceivedEvent) genericEvent).getMember().getId().equals(genericEvent.getJDA().getSelfUser().getId())) {
                 Message message = ((MessageReceivedEvent) genericEvent).getMessage();
                 switch (message.getContentRaw().split(" ")[0]) {
+                    case "%shutdown":
+                        if (message.getChannel().getId().equals("1272745478538264592")) {
+                            message.reply("Bot is stopping").queue();
+                            Main.main.stop();
+                        }
+                        break;
                     case "%leader-board":
                         Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
                         Statement stmt = connection.createStatement();
@@ -207,9 +213,9 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
                                         Connection c = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
                                         Statement s = c.createStatement();
                                         ResultSet r = s.executeQuery("SELECT ID FROM GAME WHERE RED_PLAYER = " + user.getId() + " OR BLACK_PLAYER = " + user.getId() + " ORDER BY ID DESC LIMIT 1");
-                                        if(r.next()) {
+                                        if (r.next()) {
                                             embed.addField("最近遊戲（ID）", r.getString("ID"), false);
-                                        }else{
+                                        } else {
                                             embed.addField("最近遊戲（ID）", "未曾進行遊戲", false);
                                         }
                                         c.close();
