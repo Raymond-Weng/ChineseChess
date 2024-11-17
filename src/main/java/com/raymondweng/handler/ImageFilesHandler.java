@@ -44,6 +44,7 @@ public class ImageFilesHandler implements Runnable {
     }
 
     public void stop() {
+        System.out.println("Stop command received, server stopping.");
         running = false;
         for (Board board : boards.values()) {
             board.remove();
