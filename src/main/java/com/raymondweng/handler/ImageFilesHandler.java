@@ -26,18 +26,19 @@ public class ImageFilesHandler implements Runnable {
 
     @Override
     public void run() {
-        long nextUpdate = System.currentTimeMillis() + 1000;
         while (running) {
-            if (System.currentTimeMillis() > nextUpdate) {
-                nextUpdate += 1000;
-                synchronized (this) {
-                    for (Board board : boards.values()) {
-                        if (System.currentTimeMillis() > board.getDeadTime()) {
-                            board.remove();
-                            boards.remove(board.id);
-                        }
+            synchronized (this) {
+                for (Board board : boards.values()) {
+                    if (System.currentTimeMillis() > board.getDeadTime()) {
+                        board.remove();
+                        boards.remove(board.id);
                     }
                 }
+            }
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
         }
     }
