@@ -21,7 +21,6 @@ public class Game {
 
     private volatile Position positions[][][] = new Position[2][7][5];
 
-
     private Game(String id, String red, String black, int time, boolean playing) {
         this.id = id;
         this.red = red;
@@ -183,6 +182,11 @@ public class Game {
         }
 
         return res.toString();
+    }
+
+    private Position stringToPosition(String pos) {
+        //TODO
+        return null;
     }
 
     private String posToString(Position pos) {
