@@ -233,6 +233,13 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
                             message.reply("該使用者尚未註冊").queue();
                         }
                         break;
+                    case "%move":
+                        if (message.getContentRaw().split(" ").length < 2 || !Game.isLegalPosition(message.getContentRaw().split(" ")[1])) {
+                            //TODO dealing with wrong input
+                        } else {
+                            //TODO dealing with move input
+                        }
+                        break;
                 }
 
             }

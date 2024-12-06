@@ -1,7 +1,7 @@
 package com.raymondweng.handler;
 
 import com.raymondweng.core.Board;
-import com.raymondweng.core.Position;
+import com.raymondweng.types.Position;
 
 import java.io.IOException;
 import java.util.HashMap;

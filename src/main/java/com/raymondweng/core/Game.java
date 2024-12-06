@@ -1,6 +1,8 @@
 package com.raymondweng.core;
 
 import com.raymondweng.Main;
+import com.raymondweng.types.Pair;
+import com.raymondweng.types.Position;
 
 import java.io.File;
 import java.io.IOException;
@@ -184,12 +186,21 @@ public class Game {
         return res.toString();
     }
 
-    private Position stringToPosition(String pos) {
-        //TODO
-        return null;
-    }
-
     private String posToString(Position pos) {
         return pos == null ? "n" : pos.toString();
+    }
+
+    public static boolean isLegalPosition(String s) {
+        return s.matches("[A-I][0-9][A-I][0-9]");
+    }
+
+    private Pair<Position, Position> stringToPosition(String pos) {
+        if (!isLegalPosition(pos)) {
+            return null;
+        }
+        return new Pair<>(
+                new Position((pos.charAt(0) - 'A'), (pos.charAt(1) - '0')),
+                new Position((pos.charAt(2) - 'A'), (pos.charAt(3) - '0'))
+        );
     }
 }
