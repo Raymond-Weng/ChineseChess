@@ -1,6 +1,6 @@
 package com.raymondweng.handler;
 
-import com.raymondweng.core.Board;
+import com.raymondweng.core.BoardImage;
 import com.raymondweng.types.Position;
 
 import java.io.IOException;
@@ -10,14 +10,14 @@ import java.util.Map;
 public class ImageFilesHandler implements Runnable {
     volatile boolean running = true;
 
-    public final Map<String, Board> boards = new HashMap<String, Board>();
+    public final Map<String, BoardImage> boards = new HashMap<String, BoardImage>();
 
-    public Board getBoard(Position[][][] positions, String id) throws IOException {
+    public BoardImage getBoard(Position[][][] positions, String id) throws IOException {
         synchronized (this) {
             if (boards.containsKey(id)) {
                 boards.get(id).extendLife();
             } else {
-                boards.put(id, new Board(positions, id));
+                boards.put(id, new BoardImage(positions, id));
             }
         }
 
@@ -28,10 +28,10 @@ public class ImageFilesHandler implements Runnable {
     public void run() {
         while (running) {
             synchronized (this) {
-                for (Board board : boards.values()) {
-                    if (System.currentTimeMillis() > board.getDeadTime()) {
-                        board.remove();
-                        boards.remove(board.id);
+                for (BoardImage boardImage : boards.values()) {
+                    if (System.currentTimeMillis() > boardImage.getDeadTime()) {
+                        boardImage.remove();
+                        boards.remove(boardImage.id);
                     }
                 }
             }
@@ -46,8 +46,8 @@ public class ImageFilesHandler implements Runnable {
     public void stop() {
         System.out.println("Stop command received, server stopping.");
         running = false;
-        for (Board board : boards.values()) {
-            board.remove();
+        for (BoardImage boardImage : boards.values()) {
+            boardImage.remove();
         }
     }
 }

@@ -8,7 +8,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-public class Board {
+public class BoardImage {
     public final String id;
     private final Position[][][] positions;
     private final String[][] name = {
@@ -25,7 +25,7 @@ public class Board {
     private File file;
     private long deadTime;
 
-    public Board(Position[][][] positions, String id) throws IOException {
+    public BoardImage(Position[][][] positions, String id) throws IOException {
         // setup
         this.id = id;
         this.positions = positions;
@@ -53,7 +53,7 @@ public class Board {
         extendLife();
     }
 
-    public File getImage() throws IOException {
+    public File getImage() {
         return file;
     }
 
