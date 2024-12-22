@@ -20,8 +20,7 @@ public class Game {
     private volatile int redTime = 600;
     private volatile int lastMove = -1;
     private volatile boolean redPlaying = true;
-
-    private volatile Position positions[][][] = new Position[2][7][5];
+    private volatile GameBoard gameBoard;
 
     private Game(String id, String red, String black, int time, boolean playing) {
         this.id = id;
@@ -29,20 +28,7 @@ public class Game {
         this.black = black;
         this.playing = playing;
         this.lastMove = time;
-
-        for (int i = 0; i < 2; i++) {
-            positions[i][0][0] = new Position(4, i * 9);
-            for (int r = 0; r < 2; r++) {
-                positions[i][1][r] = new Position(3 + (r * 2), i * 9);
-                positions[i][2][r] = new Position(2 + (r * 4), i * 9);
-                positions[i][3][r] = new Position(1 + (r * 6), i * 9);
-                positions[i][4][r] = new Position(r * 8, i * 9);
-                positions[i][5][r] = new Position(1 + (r * 6), 2 + (i * 5));
-            }
-            for (int r = 0; r < 5; r++) {
-                positions[i][6][r] = new Position(r * 2, 3 + (i * 3));
-            }
-        }
+        this.gameBoard = new GameBoard();
     }
 
     public static int playingGamesCount() {
@@ -163,31 +149,11 @@ public class Game {
     }
 
     public File toImage() throws IOException {
-        return Main.main.getImageFilesHandler().getBoard(positions, toString()).getImage();
+        return Main.main.getImageFilesHandler().getBoard(gameBoard.getPositions(), toString()).getImage();
     }
 
     public String toString() {
-        StringBuilder res = new StringBuilder();
-
-        for (int i = 0; i < 2; i++) {
-            res.append(posToString(positions[i][0][0]));
-            for (int r = 0; r < 2; r++) {
-                res.append(posToString(positions[i][1][r]));
-                res.append(posToString(positions[i][2][r]));
-                res.append(posToString(positions[i][3][r]));
-                res.append(posToString(positions[i][4][r]));
-                res.append(posToString(positions[i][5][r]));
-            }
-            for (int r = 0; r < 5; r++) {
-                res.append(posToString(positions[i][6][r]));
-            }
-        }
-
-        return res.toString();
-    }
-
-    private String posToString(Position pos) {
-        return pos == null ? "n" : pos.toString();
+        return gameBoard.toString();
     }
 
     public static boolean isLegalPosition(String s) {
