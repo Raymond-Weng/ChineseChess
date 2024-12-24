@@ -16,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import java.sql.*;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
     public boolean registered(String id) throws SQLException {
@@ -236,7 +237,7 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
                         if (!registered(message.getMember().getId())) {
                             message.reply("請先註冊後再進行遊戲，如需更多資訊請使用`%help`指令").queue();
                         } else {
-                            if (message.getContentRaw().split(" ").length < 2 || !Game.isLegalPosition(message.getContentRaw().split(" ")[1])) {
+                            if (message.getContentRaw().split(" ").length < 2 || !Game.isLegalPosition(message.getContentRaw().split(" ")[1].toUpperCase(Locale.ENGLISH))) {
                                 //TODO dealing with wrong input
                             } else {
                                 Connection c = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
@@ -253,7 +254,7 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
                                     if (game.isOnesTurn(message.getMember().getId())) {
                                         //TODO is not his turn
                                     } else {
-                                        switch (game.move(message.getContentRaw().split(" ")[1])) {
+                                        switch (game.move(message.getContentRaw().split(" ")[1].toUpperCase(Locale.ENGLISH))) {
                                             case null:
                                                 // TODO move successfully
                                                 break;
