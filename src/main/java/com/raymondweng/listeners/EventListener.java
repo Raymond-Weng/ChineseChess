@@ -1,6 +1,5 @@
 package com.raymondweng.listeners;
 
-
 import com.raymondweng.Main;
 import com.raymondweng.core.Game;
 import com.raymondweng.core.Invite;
@@ -234,10 +233,39 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
                         }
                         break;
                     case "%move":
-                        if (message.getContentRaw().split(" ").length < 2 || !Game.isLegalPosition(message.getContentRaw().split(" ")[1])) {
-                            //TODO dealing with wrong input
+                        if (!registered(message.getMember().getId())) {
+                            message.reply("請先註冊後再進行遊戲，如需更多資訊請使用`%help`指令").queue();
                         } else {
-                            //TODO dealing with move input
+                            if (message.getContentRaw().split(" ").length < 2 || !Game.isLegalPosition(message.getContentRaw().split(" ")[1])) {
+                                //TODO dealing with wrong input
+                            } else {
+                                Connection c = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
+                                Statement s = c.createStatement();
+                                ResultSet r = s.executeQuery("SELECT GAME_PLAYING FROM PLAYER WHERE ID = " + message.getMember().getId());
+                                int n = 0;
+                                if (r.next()) {
+                                    n = r.getInt("GAME_PLAYING");
+                                }
+                                if (n == 0) {
+                                    //TODO the one requesting isn't in any game
+                                } else {
+                                    Game game = Game.getGame(n);
+                                    if (game.isOnesTurn(message.getMember().getId())) {
+                                        //TODO is not his turn
+                                    } else {
+                                        switch (game.move(message.getContentRaw().split(" ")[1])) {
+                                            case null:
+                                                // TODO move successfully
+                                                break;
+                                            case "checkmate": // THIS STRING IS RELATED TO move() in GameBoard.java
+                                                // TODO checkmate
+                                                break;
+                                            default:
+                                                // TODO illegal move
+                                        }
+                                    }
+                                }
+                            }
                         }
                         break;
                 }

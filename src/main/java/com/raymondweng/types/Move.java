@@ -4,7 +4,7 @@ public class Move {
     public Move block = null;
     public final int x;
     public final int y;
-    public boolean pass = false;
+    public final boolean pass;
 
     public Move(int x, int y) {
         this(x, y, false);
@@ -14,6 +14,10 @@ public class Move {
         this.x = x;
         this.y = y;
         this.pass = pass;
+    }
+
+    public Move(Position first, Position second) {
+        this(second.x() - first.x(), second.y() - first.y());
     }
 
     public Move addBlock(Move move){

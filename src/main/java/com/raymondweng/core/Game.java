@@ -1,6 +1,7 @@
 package com.raymondweng.core;
 
 import com.raymondweng.Main;
+import com.raymondweng.types.Move;
 import com.raymondweng.types.Pair;
 import com.raymondweng.types.Position;
 
@@ -113,6 +114,20 @@ public class Game {
         }
     }
 
+    public static boolean isLegalPosition(String s) {
+        return s.matches("[A-I][0-9][A-I][0-9]");
+    }
+
+    public static Pair<Position, Position> stringToPosition(String pos) {
+        if (!isLegalPosition(pos)) {
+            return null;
+        }
+        return new Pair<>(
+                new Position((pos.charAt(0) - 'A'), (pos.charAt(1) - '0')),
+                new Position((pos.charAt(2) - 'A'), (pos.charAt(3) - '0'))
+        );
+    }
+
     public void endGame(boolean redWin, boolean blackWin, String reason) {
         try {
             Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
@@ -143,6 +158,11 @@ public class Game {
         games.remove(this.id);
     }
 
+    public String move(String action){
+        Pair<Position, Position> positionPair = stringToPosition(action);
+        return gameBoard.move(positionPair.first(), new Move(positionPair.first(), positionPair.second()), redPlaying);
+    }
+
     public String getMessage() {
         //TODO message
         return "The message haven't been written yet";
@@ -156,17 +176,7 @@ public class Game {
         return gameBoard.toString();
     }
 
-    public static boolean isLegalPosition(String s) {
-        return s.matches("[A-I][0-9][A-I][0-9]");
-    }
-
-    private Pair<Position, Position> stringToPosition(String pos) {
-        if (!isLegalPosition(pos)) {
-            return null;
-        }
-        return new Pair<>(
-                new Position((pos.charAt(0) - 'A'), (pos.charAt(1) - '0')),
-                new Position((pos.charAt(2) - 'A'), (pos.charAt(3) - '0'))
-        );
+    public boolean isOnesTurn(String id){
+        return id.equals(redPlaying ? red : black);
     }
 }

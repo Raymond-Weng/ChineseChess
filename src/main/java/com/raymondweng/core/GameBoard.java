@@ -175,13 +175,121 @@ public class GameBoard {
         return positions;
     }
 
-    public GameBoard move(Position pos, Move move) {
-        //TODO
+    public String move(Position pos, Move move, boolean redPlaying) {
+        // move one's piece?
+        if (board[pos.x()][pos.y()] == null) {
+            return "不能移動空白";
+        } else if (board[pos.x()][pos.y()].isRed != redPlaying) {
+            return "不能移動對方的棋子";
+        }
+
+        // legal move?
+        Position dist = pos.move(move);
+        if (board[dist.x()][dist.y()] != null && board[dist.x()][dist.y()].isRed == redPlaying) {
+            return "不能吃自己的棋子";
+        }
+        if (illegalMove(board, pos, move)) {
+            return "這個棋子不能這樣移動";
+        }
+
+        // checked?
+        Piece[][] nb = moveStep(board, pos, move);
+        if (check(nb, !redPlaying)) {
+            return "你被將軍了";
+        }
+
+        // checkmate?
+        if (check(nb, redPlaying)) checkmate:{
+            for (int i = 0; i <= 8; i++) {
+                for (int r = 0; r <= 9; r++) {
+                    Position p = new Position(i, r);
+                    if (board[i][r] != null && board[i][r].isRed != redPlaying) {
+                        for (Move m : board[i][r].moves) {
+                            if (!check(moveStep(nb, p, m), redPlaying)) {
+                                break checkmate;
+                            }
+                        }
+                    }
+                }
+            }
+            return "checkmate"; // THIS STRING IS RELATED TO onEvent() case %move in EventListener.java
+        }
+
+        // TODO update board
+
         return null;
     }
 
-    public boolean checked() {
-        //TODO
+    private boolean illegalMove(Piece[][] b, Position pos, Move move) {
+        boolean badMove = true;
+        for (Move m : b[pos.x()][pos.y()].moves) {
+            if (move == m) {
+                if (m.pass) {
+                    if (move.x == 0) {
+                        int passed = 0;
+                        for (int i = 1; i <= move.y; i++) {
+                            if (b[pos.x()][pos.y() + i] != null) {
+                                passed++;
+                            }
+                        }
+                        badMove = (passed == 0 || passed == 2);
+                    } else if (move.y == 0) {
+                        int passed = 0;
+                        for (int i = 1; i <= move.x; i++) {
+                            if (b[pos.x() + i][pos.y()] != null) {
+                                passed++;
+                            }
+                        }
+                        badMove = (passed == 0 || passed == 2);
+                    }
+                } else if (m.block == null) {
+                    badMove = false;
+                } else {
+                    badMove = b[pos.move(m.block).x()][pos.move(m.block).y()] != null;
+                }
+                break;
+            }
+        }
+        return badMove;
+    }
+
+    private boolean check(Piece[][] nb, boolean red) {
+        Position king = null;
+        for (int i = 3; i <= 5; i++) {
+            for (int r = (red ? 7 : 0); r <= (red ? 9 : 2); r++) {
+                if (nb[i][r].type == 0) {
+                    king = new Position(i, r);
+                    break;
+                }
+            }
+            if (king != null) {
+                break;
+            }
+        }
+
+        for (int i = 0; i <= 8; i++) {
+            for (int r = 0; r <= 9; r++) {
+                if (nb[i][r] != null && nb[i][r].isRed == red) {
+                    Position pos1 = new Position(i, r);
+                    for (Move m : nb[i][r].moves) {
+                        Position pos2 = pos1.move(m);
+                        if (pos2.equals(king) && pos2.inBoard() && !illegalMove(nb, pos1, m)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
         return false;
+    }
+
+    // move WITHOUT checking
+    private Piece[][] moveStep(Piece[][] board, Position pos, Move move) {
+        Piece[][] nb = board.clone();
+        Position dist = pos.move(move);
+        nb[dist.x()][dist.y()] = nb[pos.x()][pos.y()];
+        nb[pos.x()][pos.y()] = null;
+        return nb;
     }
 }
