@@ -22,7 +22,7 @@ public class BoardImage {
     // type1~5: 0~1 (0 is the left one in the beginning
     // type6: 0~4 (from left to right in the beginning)
 
-    private File file;
+    private final File file;
     private long deadTime;
 
     public BoardImage(Position[][][] positions, String id) throws IOException {
@@ -79,6 +79,8 @@ public class BoardImage {
     }
 
     public void remove() {
-        file.delete();
+        if(!file.delete()){
+            throw new RuntimeException("Image could not be deleted");
+        }
     }
 }

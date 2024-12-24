@@ -20,16 +20,16 @@ public class Move {
         this(second.x() - first.x(), second.y() - first.y());
     }
 
-    public Move addBlock(Move move){
+    public Move addBlock(Move move) {
         this.block = move;
         return this;
     }
 
     @Override
-    public boolean equals(Object move){
-        if(move instanceof Move m){
+    public boolean equals(Object move) {
+        if (move instanceof Move m) {
             return x == m.x && y == m.y;
-        }else{
+        } else {
             return false;
         }
     }

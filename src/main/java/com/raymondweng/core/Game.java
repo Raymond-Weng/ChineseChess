@@ -158,7 +158,7 @@ public class Game {
         games.remove(this.id);
     }
 
-    public String move(String action){
+    public String move(String action) {
         Pair<Position, Position> positionPair = stringToPosition(action);
         return gameBoard.move(positionPair.first(), new Move(positionPair.first(), positionPair.second()), redPlaying);
     }
@@ -176,7 +176,7 @@ public class Game {
         return gameBoard.toString();
     }
 
-    public boolean isOnesTurn(String id){
+    public boolean isOnesTurn(String id) {
         return id.equals(redPlaying ? red : black);
     }
 }

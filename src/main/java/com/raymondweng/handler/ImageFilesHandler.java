@@ -10,7 +10,7 @@ import java.util.Map;
 public class ImageFilesHandler implements Runnable {
     volatile boolean running = true;
 
-    public final Map<String, BoardImage> boards = new HashMap<String, BoardImage>();
+    public final Map<String, BoardImage> boards = new HashMap<>();
 
     public BoardImage getBoard(Position[][][] positions, String id) throws IOException {
         synchronized (this) {
