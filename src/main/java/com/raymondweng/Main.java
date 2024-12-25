@@ -14,6 +14,8 @@ import java.io.InputStreamReader;
 import java.sql.*;
 
 public class Main {
+    public static final boolean DEBUG = true;
+
     public static volatile Main main;
 
     private boolean running = true;
@@ -87,11 +89,8 @@ public class Main {
                         "(ID INTEGER PRIMARY KEY AUTOINCREMENT ," +
                         "RED_PLAYER INTEGER NOT NULL," +
                         "BLACK_PLAYER INTEGER NOT NULL," +
-                        "TURN_RED BOOLEAN NOT NULL DEFAULT TRUE," +
                         "PROCESS TEXT NOT NULL DEFAULT ''," +
                         "PLAYING BOOLEAN NOT NULL DEFAULT TRUE, " +
-                        "RED_TIMELEFT INTEGER NOT NULL DEFAULT 600, " +
-                        "BLACK_TIMELEFT INTEGER NOT NULL DEFAULT 600, " +
                         "END_REASON TEXT DEFAULT NULL)");
                 stmt.close();
                 connection.close();

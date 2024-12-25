@@ -3,6 +3,10 @@ package com.raymondweng.core;
 import com.raymondweng.types.Move;
 import com.raymondweng.types.Position;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 
 class Piece {
@@ -14,8 +18,8 @@ class Piece {
             setup = true;
             synchronized (pieces) {
                 for (int i = 0; i < 8; i++) {
-                    pieces[0][i] = new Piece(false, type);
-                    pieces[1][i] = new Piece(true, type);
+                    pieces[0][i] = new Piece(false, i);
+                    pieces[1][i] = new Piece(true, i);
                 }
             }
         }
@@ -80,7 +84,7 @@ class Piece {
 
 public class GameBoard {
     private volatile Position positions[][][] = new Position[2][7][5];
-    private Piece[][] board = new Piece[9][10];
+    private volatile Piece[][] board = new Piece[9][10];
 
     public GameBoard() {
         // positions[][][] setup
@@ -134,7 +138,7 @@ public class GameBoard {
         }
         for (int i = 0; i < 9; i++) {
             if (i == 1 || i == 7) {
-                board[i][7] = Piece.getPiece(true, 5);
+                board[i][7] = Piece.getPiece(false, 5);
             } else {
                 board[i][7] = null;
             }
@@ -143,7 +147,7 @@ public class GameBoard {
             board[i][8] = null;
         }
         for (int i = 0; i < 9; i++) {
-            board[i][9] = Piece.getPiece(true, Math.abs(4 - i));
+            board[i][9] = Piece.getPiece(false, Math.abs(4 - i));
         }
     }
 
@@ -175,12 +179,17 @@ public class GameBoard {
         return positions;
     }
 
-    public String move(Position pos, Move move, boolean redPlaying) {
+    public String move(Position pos, Move move, boolean redPlaying, String action, String id) {
         // move one's piece?
         if (board[pos.x()][pos.y()] == null) {
             return "不能移動空白";
         } else if (board[pos.x()][pos.y()].isRed != redPlaying) {
             return "不能移動對方的棋子";
+        }
+
+        // not move
+        if (move.x == 0 && move.y == 0) {
+            return "你甚至沒有移動?";
         }
 
         // legal move?
@@ -197,6 +206,46 @@ public class GameBoard {
         if (check(nb, !redPlaying)) {
             return "你被將軍了";
         }
+
+        try {
+            Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
+            Statement statement = connection.createStatement();
+            statement.executeUpdate("UPDATE GAME SET PROCESS = PROCESS || \"" + action + "\" WHERE ID = " + id);
+            statement.close();
+            connection.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        if (board[pos.move(move).x()][pos.move(move).y()] != null) {
+            int cnt = switch (board[pos.move(move).x()][pos.move(move).y()].type) {
+                case 0 -> 1;
+                case 1, 2, 3, 4, 5 -> 2;
+                case 6, 7 ->
+                        5;
+                default -> 0;
+            };
+            for (int i = 0; i < cnt; i++) {
+                Position p = positions[redPlaying ? 1 : 0][board[pos.move(move).x()][pos.move(move).y()].type == 7 ? 6 : board[pos.move(move).x()][pos.move(move).y()].type][i];
+                if(p.equals(pos.move(move))){
+                    positions[redPlaying ? 1 : 0][board[pos.move(move).x()][pos.move(move).y()].type == 7 ? 6 : board[pos.move(move).x()][pos.move(move).y()].type][i] = null;
+                    break;
+                }
+            }
+        }
+        int cnt = switch (board[pos.x()][pos.y()].type) {
+            case 0 -> 1;
+            case 1, 2, 3, 4, 5 -> 2;
+            case 6, 7 -> 5;
+            default -> 0;
+        };
+        for (int i = 0; i < cnt; i++) {
+            Position p = positions[redPlaying ? 1 : 0][board[pos.x()][pos.y()].type == 7 ? 6 : board[pos.x()][pos.y()].type][i];
+            if(p.equals(pos)){
+                positions[redPlaying ? 1 : 0][board[pos.x()][pos.y()].type == 7 ? 6 : board[pos.x()][pos.y()].type][i] = p.move(move);
+                break;
+            }
+        }
+        board = nb;
 
         // checkmate?
         if (check(nb, redPlaying)) checkmate:{
@@ -215,15 +264,13 @@ public class GameBoard {
             return "checkmate"; // THIS STRING IS RELATED TO onEvent() case %move in EventListener.java
         }
 
-        // TODO update board
-
         return null;
     }
 
     private boolean illegalMove(Piece[][] b, Position pos, Move move) {
         boolean badMove = true;
         for (Move m : b[pos.x()][pos.y()].moves) {
-            if (move == m) {
+            if (move.equals(m)) {
                 if (m.pass) {
                     if (move.x == 0) {
                         int passed = 0;
@@ -257,7 +304,7 @@ public class GameBoard {
         Position king = null;
         for (int i = 3; i <= 5; i++) {
             for (int r = (red ? 7 : 0); r <= (red ? 9 : 2); r++) {
-                if (nb[i][r].type == 0) {
+                if (nb[i][r] != null && nb[i][r].type == 0) {
                     king = new Position(i, r);
                     break;
                 }
@@ -286,10 +333,18 @@ public class GameBoard {
 
     // move WITHOUT checking
     private Piece[][] moveStep(Piece[][] board, Position pos, Move move) {
-        Piece[][] nb = board.clone();
+        Piece[][] nb = new Piece[9][10];
+        for(int i = 0; i < 9; i++) {
+            System.arraycopy(board[i], 0, nb[i], 0, 10);
+        }
         Position dist = pos.move(move);
+        //TODO type 6 upgrade to type 7
         nb[dist.x()][dist.y()] = nb[pos.x()][pos.y()];
         nb[pos.x()][pos.y()] = null;
         return nb;
+    }
+
+    public boolean check(boolean red){
+        return check(board, red);
     }
 }

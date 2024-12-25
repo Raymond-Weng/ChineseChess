@@ -20,8 +20,8 @@ public class Game {
     private volatile int blackTime = 600;
     private volatile int redTime = 600;
     private volatile int lastMove = -1;
-    private volatile boolean redPlaying = true;
-    private volatile GameBoard gameBoard;
+    public volatile boolean redPlaying = true;
+    private final GameBoard gameBoard;
 
     private Game(String id, String red, String black, int time, boolean playing) {
         this.id = id;
@@ -95,19 +95,12 @@ public class Game {
     public static void update() {
         synchronized (games) {
             try {
-                Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
-                Statement stmt = connection.createStatement();
-                ResultSet rs = stmt.executeQuery("SELECT STRFTIME('%s', 'now') AS T");
-                rs.next();
-                int time = rs.getInt("T");
-                rs.close();
-                stmt.close();
+                int time = getTime();
                 for (Game game : games.values()) {
                     if (time - game.lastMove > ((game.redPlaying ? game.redTime : game.blackTime) >= 0 ? 180 : 60)) {
                         game.endGame(!game.redPlaying, game.redPlaying, "用盡步時");
                     }
                 }
-                connection.close();
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
@@ -126,6 +119,18 @@ public class Game {
                 new Position((pos.charAt(0) - 'A'), (pos.charAt(1) - '0')),
                 new Position((pos.charAt(2) - 'A'), (pos.charAt(3) - '0'))
         );
+    }
+
+    public static int getTime() throws SQLException {
+        Connection cc = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
+        Statement ss = cc.createStatement();
+        ResultSet rr = ss.executeQuery("SELECT STRFTIME('%s', 'now') AS T");
+        rr.next();
+        int timeGot = rr.getInt("T");
+        rr.close();
+        ss.close();
+        cc.close();
+        return timeGot;
     }
 
     public void endGame(boolean redWin, boolean blackWin, String reason) {
@@ -160,12 +165,20 @@ public class Game {
 
     public String move(String action) {
         Pair<Position, Position> positionPair = stringToPosition(action);
-        return gameBoard.move(positionPair.first(), new Move(positionPair.first(), positionPair.second()), redPlaying);
+        return gameBoard.move(positionPair.first(), new Move(positionPair.first(), positionPair.second()), redPlaying, action, id);
     }
 
     public String getMessage() {
-        //TODO message
-        return "The message haven't been written yet";
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("<@");
+        stringBuilder.append(redPlaying ? red : black);
+        stringBuilder.append("> 現在輪到你！你是");
+        stringBuilder.append(redPlaying ? "紅方" : "黑方");
+        if(gameBoard.check(!redPlaying)){
+            stringBuilder.append("\n請注意！你被將軍了");
+        }
+
+        return stringBuilder.toString();
     }
 
     public File toImage() throws IOException {
@@ -178,5 +191,14 @@ public class Game {
 
     public boolean isOnesTurn(String id) {
         return id.equals(redPlaying ? red : black);
+    }
+
+    public void updateTime(int gotTime) throws SQLException {
+        if(redPlaying){
+            redTime = gotTime - lastMove;
+        }else{
+            blackTime = gotTime - lastMove;
+        }
+        lastMove = getTime();
     }
 }

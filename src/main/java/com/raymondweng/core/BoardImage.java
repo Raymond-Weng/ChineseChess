@@ -25,6 +25,7 @@ public class BoardImage {
     private final File file;
     private long deadTime;
 
+    //TODO Image not updating
     public BoardImage(Position[][][] positions, String id) throws IOException {
         // setup
         this.id = id;

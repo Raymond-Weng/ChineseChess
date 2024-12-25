@@ -234,35 +234,42 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
                         }
                         break;
                     case "%move":
+                        int timeGot = Game.getTime();
                         if (!registered(message.getMember().getId())) {
                             message.reply("請先註冊後再進行遊戲，如需更多資訊請使用`%help`指令").queue();
                         } else {
                             if (message.getContentRaw().split(" ").length < 2 || !Game.isLegalPosition(message.getContentRaw().split(" ")[1].toUpperCase(Locale.ENGLISH))) {
-                                //TODO dealing with wrong input
+                                message.reply("用法：`%move <action>`，<action>裡面是四個字的兩個座標，例如A1A2").queue();
                             } else {
                                 Connection c = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
                                 Statement s = c.createStatement();
-                                ResultSet r = s.executeQuery("SELECT GAME_PLAYING FROM PLAYER WHERE ID = " + message.getMember().getId());
+                                ResultSet r = s.executeQuery("SELECT GAME_PLAYING FROM PLAYER WHERE DISCORD_ID = " + message.getMember().getId());
                                 int n = 0;
                                 if (r.next()) {
                                     n = r.getInt("GAME_PLAYING");
                                 }
+                                r.close();
+                                c.close();
+                                s.close();
                                 if (n == 0) {
-                                    //TODO the one requesting isn't in any game
+                                    message.reply("請先加入一個遊戲後再移動棋子").queue();
                                 } else {
                                     Game game = Game.getGame(n);
                                     if (game.isOnesTurn(message.getMember().getId())) {
-                                        //TODO is not his turn
+                                        message.reply("還沒換你喔...").queue();
                                     } else {
-                                        switch (game.move(message.getContentRaw().split(" ")[1].toUpperCase(Locale.ENGLISH))) {
-                                            case null:
-                                                // TODO move successfully
-                                                break;
+                                        String res = game.move(message.getContentRaw().split(" ")[1].toUpperCase(Locale.ENGLISH));
+                                        switch (res) {
                                             case "checkmate": // THIS STRING IS RELATED TO move() in GameBoard.java
-                                                // TODO checkmate
+                                                game.endGame(game.redPlaying, !game.redPlaying, "將死");
+                                            case null:
+                                                message.reply("已接受").queue();
+                                                message.getChannel().sendMessage(game.getMessage()).addFiles(FileUpload.fromData(game.toImage())).queue();
+                                                game.updateTime(timeGot);
+                                                game.redPlaying = !game.redPlaying;
                                                 break;
                                             default:
-                                                // TODO illegal move
+                                                message.reply(res).queue();
                                         }
                                     }
                                 }
@@ -285,9 +292,7 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
                         genericEvent.getJDA()
                                 .getCategoryById("1270560414274687009")
                                 .createVoiceChannel(((GuildVoiceUpdateEvent) genericEvent).getMember().getUser().getEffectiveName() + "的語音頻道")
-                                .queue(channel -> {
-                                    ((GuildVoiceUpdateEvent) genericEvent).getGuild().moveVoiceMember(((GuildVoiceUpdateEvent) genericEvent).getMember(), channel).queue();
-                                });
+                                .queue(channel -> ((GuildVoiceUpdateEvent) genericEvent).getGuild().moveVoiceMember(((GuildVoiceUpdateEvent) genericEvent).getMember(), channel).queue());
                     }
                 }
             }
@@ -317,6 +322,9 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
     }
 
     public void err(Exception e, GenericEvent genericEvent) {
+        if(Main.DEBUG){
+            throw new RuntimeException(e);
+        }
         if (genericEvent instanceof MessageReceivedEvent) {
             ((MessageReceivedEvent) genericEvent).getMessage().reply("處理的過程好像發生了錯誤...管理員會盡快處理，非常抱歉").queue();
         }
