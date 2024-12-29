@@ -201,6 +201,13 @@ public class Game {
         stringBuilder.append(redPlaying ? red : black);
         stringBuilder.append("> 現在輪到你！你是");
         stringBuilder.append(redPlaying ? "紅方" : "黑方");
+        if((redPlaying ? redTime : blackTime) > 0) {
+            stringBuilder.append("\n你的局時還有");
+            stringBuilder.append(redPlaying ? redTime : blackTime);
+            stringBuilder.append("秒，請在180秒內做出決定，局時用盡後的下一步棋開始需要在60秒內做出決定。");
+        }else{
+            stringBuilder.append("\n你的局時已用盡，請在60秒內做出決定。");
+        }
         if(gameBoard.check(!redPlaying)){
             stringBuilder.append("\n請注意！你被將軍了");
         }
@@ -222,9 +229,9 @@ public class Game {
 
     public void updateTime(int gotTime) throws SQLException {
         if(redPlaying){
-            redTime = gotTime - lastMove;
+            redTime -= gotTime - lastMove;
         }else{
-            blackTime = gotTime - lastMove;
+            blackTime -= gotTime - lastMove;
         }
         lastMove = getTime();
     }

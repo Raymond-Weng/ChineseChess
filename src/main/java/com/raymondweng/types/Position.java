@@ -12,13 +12,13 @@ public record Position(int x, int y) {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof Position p) {
-            return p.x == x && p.y == y;
+        if (obj instanceof Position(int x1, int y1)) {
+            return x1 == x && y1 == y;
         }
         return false;
     }
 
     public boolean inBoard() {
-        return x >= 0 && x < 8 && y >= 0 && y < 9;
+        return x >= 0 && x <= 8 && y >= 0 && y <= 9;
     }
 }

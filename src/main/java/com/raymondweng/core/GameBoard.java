@@ -65,10 +65,10 @@ class Piece {
             case 4:
             case 5:
                 for (int x = -8; x <= 8; x++) {
-                    moves.add(new Move(x, 0, type==5));
+                    moves.add(new Move(x, 0, type == 5));
                 }
                 for (int y = -9; y <= 9; y++) {
-                    moves.add(new Move(0, y, type==5));
+                    moves.add(new Move(0, y, type == 5));
                 }
                 break;
             case 7:
@@ -182,6 +182,9 @@ public class GameBoard {
 
         // legal move?
         Position dist = pos.move(move);
+        if (!dist.inBoard()) {
+            return "不能移動到棋盤外面";
+        }
         if (board[dist.x()][dist.y()] != null && board[dist.x()][dist.y()].isRed == redPlaying) {
             return "不能吃自己的棋子";
         }
@@ -214,7 +217,7 @@ public class GameBoard {
                     Position p = new Position(i, r);
                     if (board[i][r] != null && board[i][r].isRed != redPlaying) {
                         for (Move m : board[i][r].moves) {
-                            if (!check(moveStep(nb, p, m), redPlaying)) {
+                            if (p.move(m).inBoard() && !check(moveStep(nb, p, m), redPlaying)) {
                                 break checkmate;
                             }
                         }
@@ -229,11 +232,11 @@ public class GameBoard {
 
     private void generatePositions() {
         positions = new Position[2][7][5];
-        for(int i = 0; i <= 8; i++){
-            for(int r = 0; r <= 9; r++){
-                if(board[i][r] != null){
+        for (int i = 0; i <= 8; i++) {
+            for (int r = 0; r <= 9; r++) {
+                if (board[i][r] != null) {
                     int k = 0;
-                    while(positions[board[i][r].isRed ? 0 : 1][board[i][r].type][k] != null){
+                    while (positions[board[i][r].isRed ? 0 : 1][board[i][r].type][k] != null) {
                         k++;
                     }
                     positions[board[i][r].isRed ? 0 : 1][board[i][r].type][k] = new Position(i, r);
@@ -255,7 +258,20 @@ public class GameBoard {
                         badMove = !(passed == 0 || passed == 2);
                     }
                 } else if (m.block == null) {
-                    badMove = false;
+                    if (b[pos.x()][pos.y()].type == 0 || b[pos.x()][pos.y()].type == 1) {
+                        Position dist = pos.move(m);
+                        badMove = !(dist.x() >= 3 && dist.x() <= 5 && ((dist.y() >= 0 && dist.y() <= 2) || (dist.y() >= 7 && dist.y() <= 9)));
+                    } else if (b[pos.x()][pos.y()].type == 4) {
+                        if (move.x == 0) {
+                            int passed = getPassedY(b, pos, move);
+                            badMove = !(passed == 1);
+                        } else if (move.y == 0) {
+                            int passed = getPassedX(b, pos, move);
+                            badMove = !(passed == 1);
+                        }
+                    } else {
+                        badMove = false;
+                    }
                 } else {
                     badMove = b[pos.move(m.block).x()][pos.move(m.block).y()] != null;
                 }
@@ -267,13 +283,13 @@ public class GameBoard {
 
     private static int getPassedY(Piece[][] b, Position pos, Move move) {
         int passed = 0;
-        if(move.y > 0){
+        if (move.y > 0) {
             for (int i = 1; i <= move.y; i++) {
                 if (b[pos.x()][pos.y() + i] != null) {
                     passed++;
                 }
             }
-        }else{
+        } else {
             for (int i = -1; i >= move.y; i--) {
                 if (b[pos.x()][pos.y() + i] != null) {
                     passed++;
@@ -285,13 +301,13 @@ public class GameBoard {
 
     private static int getPassedX(Piece[][] b, Position pos, Move move) {
         int passed = 0;
-        if(move.x > 0){
+        if (move.x > 0) {
             for (int i = 1; i <= move.x; i++) {
                 if (b[pos.x() + i][pos.y()] != null) {
                     passed++;
                 }
             }
-        }else{
+        } else {
             for (int i = -1; i >= move.x; i--) {
                 if (b[pos.x() + i][pos.y()] != null) {
                     passed++;
@@ -304,8 +320,8 @@ public class GameBoard {
     private boolean check(Piece[][] nb, boolean red) {
         Position king = null;
         for (int i = 3; i <= 5; i++) {
-            for (int r = (red ? 7 : 0); r <= (red ? 9 : 2); r++) {
-                if (nb[i][r] != null && nb[i][r].type == 0) {
+            for (int r = 0; r < 10; r++) {
+                if (nb[i][r] != null && nb[i][r].type == 0 && nb[i][r].isRed != red) {
                     king = new Position(i, r);
                     break;
                 }
@@ -318,10 +334,9 @@ public class GameBoard {
         for (int i = 0; i <= 8; i++) {
             for (int r = 0; r <= 9; r++) {
                 if (nb[i][r] != null && nb[i][r].isRed == red) {
-                    Position pos1 = new Position(i, r);
+                    Position pos = new Position(i, r);
                     for (Move m : nb[i][r].moves) {
-                        Position pos2 = pos1.move(m);
-                        if (pos2.equals(king) && pos2.inBoard() && !illegalMove(nb, pos1, m)) {
+                        if (pos.move(m).equals(king) && !illegalMove(nb, pos, m)) {
                             return true;
                         }
                     }
@@ -329,23 +344,46 @@ public class GameBoard {
             }
         }
 
-        return false;
+        Position selfKing = null;
+        for (int i = 3; i <= 5; i++) {
+            for (int r = 0; r < 10; r++) {
+                if (nb[i][r] != null && nb[i][r].type == 0 && nb[i][r].isRed == red) {
+                    selfKing = new Position(i, r);
+                    break;
+                }
+            }
+            if (selfKing != null) {
+                break;
+            }
+        }
+        if (king.x() == selfKing.x()) {
+            for (int i = Math.min(king.y(), selfKing.y()) + 1; i < Math.max(king.y(), selfKing.y()); i++) {
+                if (nb[king.x()][i] == null) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     // move WITHOUT checking
     private Piece[][] moveStep(Piece[][] board, Position pos, Move move) {
         Piece[][] nb = new Piece[9][10];
-        for(int i = 0; i < 9; i++) {
+        for (int i = 0; i < 9; i++) {
             System.arraycopy(board[i], 0, nb[i], 0, 10);
         }
         Position dist = pos.move(move);
-        //TODO type 6 upgrade to type 7
-        nb[dist.x()][dist.y()] = nb[pos.x()][pos.y()];
+        if (nb[pos.x()][pos.y()].type == 6 && ((pos.y() == 5 && move.y > 0) || (pos.y() == 4 && move.y < 0))) {
+            nb[dist.x()][dist.y()] = Piece.getPiece(board[pos.x()][pos.y()].isRed, 7);
+        } else {
+            nb[dist.x()][dist.y()] = nb[pos.x()][pos.y()];
+        }
         nb[pos.x()][pos.y()] = null;
         return nb;
     }
 
-    public boolean check(boolean red){
+    public boolean check(boolean red) {
         return check(board, red);
     }
 }

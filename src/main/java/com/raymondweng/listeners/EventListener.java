@@ -200,7 +200,7 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
                         }
                         break;
                     case "%data":
-                        if (message.getContentRaw().split(" ").length >= 2 && message.getContentRaw().split(" ")[1].matches("<\\d*>")) {
+                        if (message.getContentRaw().split(" ").length < 2 && !message.getContentRaw().split(" ")[1].matches("<@\\d*>")) {
                             message.reply("用法：`%data <使用者>`，在<使用者>那邊請標註一個人").queue();
                         } else if (registered(message.getContentRaw().split(" ")[1].substring(2, message.getContentRaw().split(" ")[1].length() - 1))) {
                             if (inServer(message.getContentRaw().split(" ")[1].substring(2, message.getContentRaw().split(" ")[1].length() - 1))) {
@@ -252,16 +252,18 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
                                 c.close();
                                 s.close();
                                 if (n == null) {
-                                    message.reply("請先加入一個遊戲後再移動棋子").queue();
+                                    message.reply("請先加入一個遊戲後再移動棋子\n若你確信你已經加入了一個遊戲，請確定遊戲是否結束（是否超時）").queue();
                                 } else {
                                     Game game = Game.getGame(n);
-                                    if (game.isOnesTurn(message.getMember().getId())) {
+                                    if (!game.isOnesTurn(message.getMember().getId())) {
                                         message.reply("還沒換你喔...").queue();
                                     } else {
                                         String res = game.move(message.getContentRaw().split(" ")[1].toUpperCase(Locale.ENGLISH));
                                         switch (res) {
                                             case "checkmate": // THIS STRING IS RELATED TO move() in GameBoard.java
                                                 game.endGame(game.redPlaying, !game.redPlaying, "將死");
+                                                message.getChannel().sendMessage("將死，遊戲結束！").addFiles(FileUpload.fromData(game.toImage())).queue();
+                                                break;
                                             case null:
                                                 message.reply("已接受").queue();
                                                 message.getChannel().sendMessage(game.getMessage()).addFiles(FileUpload.fromData(game.toImage())).queue();
