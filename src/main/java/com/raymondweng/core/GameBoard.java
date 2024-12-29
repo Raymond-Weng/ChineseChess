@@ -65,10 +65,10 @@ class Piece {
             case 4:
             case 5:
                 for (int x = -8; x <= 8; x++) {
-                    moves.add(new Move(x, 0, (type == 5)));
+                    moves.add(new Move(x, 0, type==5));
                 }
-                for (int y = -9; y <= 8; y++) {
-                    moves.add(new Move(0, y, (type == 5)));
+                for (int y = -9; y <= 9; y++) {
+                    moves.add(new Move(0, y, type==5));
                 }
                 break;
             case 7:
@@ -76,32 +76,17 @@ class Piece {
                 moves.add(new Move(-1, 0));
                 moves.add(new Move(1, 0));
             case 6:
-                moves.add(new Move(0, (isRed ? -1 : 1)).addBlock(new Move(0, 1)));
+                moves.add(new Move(0, (isRed ? 1 : -1)));
                 break;
         }
     }
 }
 
 public class GameBoard {
-    private volatile Position positions[][][] = new Position[2][7][5];
+    private volatile Position positions[][][] = null;
     private volatile Piece[][] board = new Piece[9][10];
 
     public GameBoard() {
-        // positions[][][] setup
-        for (int i = 0; i < 2; i++) {
-            positions[i][0][0] = new Position(4, i * 9);
-            for (int r = 0; r < 2; r++) {
-                positions[i][1][r] = new Position(3 + (r * 2), i * 9);
-                positions[i][2][r] = new Position(2 + (r * 4), i * 9);
-                positions[i][3][r] = new Position(1 + (r * 6), i * 9);
-                positions[i][4][r] = new Position(r * 8, i * 9);
-                positions[i][5][r] = new Position(1 + (r * 6), 2 + (i * 5));
-            }
-            for (int r = 0; r < 5; r++) {
-                positions[i][6][r] = new Position(r * 2, 3 + (i * 3));
-            }
-        }
-
         // board[][] setup
         for (int i = 0; i < 9; i++) {
             board[i][0] = Piece.getPiece(true, Math.abs(4 - i));
@@ -149,6 +134,9 @@ public class GameBoard {
         for (int i = 0; i < 9; i++) {
             board[i][9] = Piece.getPiece(false, Math.abs(4 - i));
         }
+
+        // setup Positions
+        generatePositions();
     }
 
     public String toString() {
@@ -216,36 +204,8 @@ public class GameBoard {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        if (board[pos.move(move).x()][pos.move(move).y()] != null) {
-            int cnt = switch (board[pos.move(move).x()][pos.move(move).y()].type) {
-                case 0 -> 1;
-                case 1, 2, 3, 4, 5 -> 2;
-                case 6, 7 ->
-                        5;
-                default -> 0;
-            };
-            for (int i = 0; i < cnt; i++) {
-                Position p = positions[redPlaying ? 1 : 0][board[pos.move(move).x()][pos.move(move).y()].type == 7 ? 6 : board[pos.move(move).x()][pos.move(move).y()].type][i];
-                if(p.equals(pos.move(move))){
-                    positions[redPlaying ? 1 : 0][board[pos.move(move).x()][pos.move(move).y()].type == 7 ? 6 : board[pos.move(move).x()][pos.move(move).y()].type][i] = null;
-                    break;
-                }
-            }
-        }
-        int cnt = switch (board[pos.x()][pos.y()].type) {
-            case 0 -> 1;
-            case 1, 2, 3, 4, 5 -> 2;
-            case 6, 7 -> 5;
-            default -> 0;
-        };
-        for (int i = 0; i < cnt; i++) {
-            Position p = positions[redPlaying ? 1 : 0][board[pos.x()][pos.y()].type == 7 ? 6 : board[pos.x()][pos.y()].type][i];
-            if(p.equals(pos)){
-                positions[redPlaying ? 1 : 0][board[pos.x()][pos.y()].type == 7 ? 6 : board[pos.x()][pos.y()].type][i] = p.move(move);
-                break;
-            }
-        }
         board = nb;
+        generatePositions();
 
         // checkmate?
         if (check(nb, redPlaying)) checkmate:{
@@ -267,27 +227,32 @@ public class GameBoard {
         return null;
     }
 
+    private void generatePositions() {
+        positions = new Position[2][7][5];
+        for(int i = 0; i <= 8; i++){
+            for(int r = 0; r <= 9; r++){
+                if(board[i][r] != null){
+                    int k = 0;
+                    while(positions[board[i][r].isRed ? 0 : 1][board[i][r].type][k] != null){
+                        k++;
+                    }
+                    positions[board[i][r].isRed ? 0 : 1][board[i][r].type][k] = new Position(i, r);
+                }
+            }
+        }
+    }
+
     private boolean illegalMove(Piece[][] b, Position pos, Move move) {
         boolean badMove = true;
         for (Move m : b[pos.x()][pos.y()].moves) {
             if (move.equals(m)) {
                 if (m.pass) {
                     if (move.x == 0) {
-                        int passed = 0;
-                        for (int i = 1; i <= move.y; i++) {
-                            if (b[pos.x()][pos.y() + i] != null) {
-                                passed++;
-                            }
-                        }
-                        badMove = (passed == 0 || passed == 2);
+                        int passed = getPassedY(b, pos, move);
+                        badMove = !(passed == 0 || passed == 2);
                     } else if (move.y == 0) {
-                        int passed = 0;
-                        for (int i = 1; i <= move.x; i++) {
-                            if (b[pos.x() + i][pos.y()] != null) {
-                                passed++;
-                            }
-                        }
-                        badMove = (passed == 0 || passed == 2);
+                        int passed = getPassedX(b, pos, move);
+                        badMove = !(passed == 0 || passed == 2);
                     }
                 } else if (m.block == null) {
                     badMove = false;
@@ -298,6 +263,42 @@ public class GameBoard {
             }
         }
         return badMove;
+    }
+
+    private static int getPassedY(Piece[][] b, Position pos, Move move) {
+        int passed = 0;
+        if(move.y > 0){
+            for (int i = 1; i <= move.y; i++) {
+                if (b[pos.x()][pos.y() + i] != null) {
+                    passed++;
+                }
+            }
+        }else{
+            for (int i = -1; i >= move.y; i--) {
+                if (b[pos.x()][pos.y() + i] != null) {
+                    passed++;
+                }
+            }
+        }
+        return passed;
+    }
+
+    private static int getPassedX(Piece[][] b, Position pos, Move move) {
+        int passed = 0;
+        if(move.x > 0){
+            for (int i = 1; i <= move.x; i++) {
+                if (b[pos.x() + i][pos.y()] != null) {
+                    passed++;
+                }
+            }
+        }else{
+            for (int i = -1; i >= move.x; i--) {
+                if (b[pos.x() + i][pos.y()] != null) {
+                    passed++;
+                }
+            }
+        }
+        return passed;
     }
 
     private boolean check(Piece[][] nb, boolean red) {

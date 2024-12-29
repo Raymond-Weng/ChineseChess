@@ -8,6 +8,7 @@ import com.raymondweng.types.Position;
 import java.io.File;
 import java.io.IOException;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Game {
@@ -36,7 +37,7 @@ public class Game {
         return games.size();
     }
 
-    public static Game getGame(int id) {
+    public static Game getGame(String id) {
         if (games.containsKey(id)) {
             return games.get(id);
         }
@@ -68,7 +69,7 @@ public class Game {
 
     public static Game startGame(String red, String black) {
         String id;
-        int time = -1;
+        int time;
         try {
             Connection connection = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
             Statement stmt = connection.createStatement();
@@ -77,14 +78,18 @@ public class Game {
             rs.next();
             id = rs.getString("ID");
             rs.close();
+            stmt.close();
+            stmt = connection.createStatement();
             stmt.executeUpdate("UPDATE PLAYER SET GAME_PLAYING = " + id + " WHERE DISCORD_ID = " + red + " OR DISCORD_ID = " + black);
+            stmt.close();
+            stmt = connection.createStatement();
             stmt.executeUpdate("UPDATE PLAYER SET PLAYING_RED = TRUE WHERE DISCORD_ID = " + red);
+            stmt.close();
+            stmt = connection.createStatement();
             stmt.executeUpdate("UPDATE PLAYER SET PLAYING_RED = FALSE WHERE DISCORD_ID = " + black);
-            rs = stmt.executeQuery("SELECT STRFTIME('%s', 'now') AS T");
-            rs.next();
-            time = rs.getInt("T");
             stmt.close();
             connection.close();
+            time = getTime();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -96,11 +101,14 @@ public class Game {
         synchronized (games) {
             try {
                 int time = getTime();
+                ArrayList<String> idsToRemove = new ArrayList<>();
                 for (Game game : games.values()) {
                     if (time - game.lastMove > ((game.redPlaying ? game.redTime : game.blackTime) >= 0 ? 180 : 60)) {
                         game.endGame(!game.redPlaying, game.redPlaying, "用盡步時");
+                        idsToRemove.add(game.id);
                     }
                 }
+                idsToRemove.forEach(games::remove);
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
@@ -141,31 +149,50 @@ public class Game {
             String b = rs.getString("BLACK_PLAYER");
             String r = rs.getString("RED_PLAYER");
             rs.close();
+            stmt.close();
+            stmt = connection.createStatement();
             rs = stmt.executeQuery("SELECT POINT FROM PLAYER WHERE DISCORD_ID = '" + b + "'");
             rs.next();
             int bp = rs.getInt("POINT");
             rs.close();
+            stmt.close();
+            stmt = connection.createStatement();
             rs = stmt.executeQuery("SELECT POINT FROM PLAYER WHERE DISCORD_ID = '" + r + "'");
             rs.next();
             int rp = rs.getInt("POINT");
             int db = (int) (16 * ((redWin ? 0 : (blackWin ? 1 : 0.5)) - (1 / (1 + Math.pow(10, (rp - bp) / 400d)))));
             int dr = (int) (16 * ((redWin ? 1 : (blackWin ? 0 : 0.5)) - (1 / (1 + Math.pow(10, (bp - rp) / 400d)))));
             rs.close();
+            stmt.close();
+            stmt = connection.createStatement();
             stmt.executeUpdate("UPDATE PLAYER SET GAME_PLAYING = NULL, PLAYING_RED = NULL WHERE DISCORD_ID = " + red + " OR DISCORD_ID = " + black);
+            stmt.close();
+            stmt = connection.createStatement();
             stmt.executeUpdate("UPDATE PLAYER SET POINT = POINT + " + db + " WHERE DISCORD_ID = " + black);
+            stmt.close();
+            stmt = connection.createStatement();
             stmt.executeUpdate("UPDATE PLAYER SET POINT = POINT + " + dr + " WHERE DISCORD_ID = " + red);
+            stmt.close();
+            stmt = connection.createStatement();
             stmt.executeUpdate("UPDATE GAME SET PLAYING = FALSE, END_REASON = '" + reason + "' WHERE ID = " + id);
             stmt.close();
             connection.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        games.remove(this.id);
     }
 
     public String move(String action) {
         Pair<Position, Position> positionPair = stringToPosition(action);
-        return gameBoard.move(positionPair.first(), new Move(positionPair.first(), positionPair.second()), redPlaying, action, id);
+        String res = gameBoard.move(positionPair.first(), new Move(positionPair.first(), positionPair.second()), redPlaying, action, id);
+        if(res == null){
+            toggleRedPlaying();
+        }
+        return res;
+    }
+
+    private synchronized void toggleRedPlaying(){
+        redPlaying = !redPlaying;
     }
 
     public String getMessage() {
@@ -189,7 +216,7 @@ public class Game {
         return gameBoard.toString();
     }
 
-    public boolean isOnesTurn(String id) {
+    public synchronized boolean isOnesTurn(String id) {
         return id.equals(redPlaying ? red : black);
     }
 

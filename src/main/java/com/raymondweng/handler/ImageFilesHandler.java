@@ -4,6 +4,7 @@ import com.raymondweng.core.BoardImage;
 import com.raymondweng.types.Position;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,11 +29,15 @@ public class ImageFilesHandler implements Runnable {
     public void run() {
         while (running) {
             synchronized (this) {
+                ArrayList<String> idsToRemove = new ArrayList<>();
                 for (BoardImage boardImage : boards.values()) {
                     if (System.currentTimeMillis() > boardImage.getDeadTime()) {
                         boardImage.remove();
-                        boards.remove(boardImage.id);
+                        idsToRemove.add(boardImage.id);
                     }
+                }
+                for (String id : idsToRemove) {
+                    boards.remove(id);
                 }
             }
             try {

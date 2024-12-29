@@ -59,6 +59,9 @@ public class BoardImage {
     }
 
     public void drawPiece(Graphics2D graphics2D, int color, int type, int number) {
+        if(positions[color][type][number] == null){
+            return;
+        }
         graphics2D.setColor(color == 0 ? Color.red : Color.black);
         graphics2D.setStroke(new BasicStroke(10));
         graphics2D.drawOval(55 + positions[color][type][number].x() * 100,

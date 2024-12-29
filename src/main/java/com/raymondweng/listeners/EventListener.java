@@ -244,14 +244,14 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
                                 Connection c = DriverManager.getConnection("jdbc:sqlite:./database/data.db");
                                 Statement s = c.createStatement();
                                 ResultSet r = s.executeQuery("SELECT GAME_PLAYING FROM PLAYER WHERE DISCORD_ID = " + message.getMember().getId());
-                                int n = 0;
+                                String n = null;
                                 if (r.next()) {
-                                    n = r.getInt("GAME_PLAYING");
+                                    n = r.getString("GAME_PLAYING");
                                 }
                                 r.close();
                                 c.close();
                                 s.close();
-                                if (n == 0) {
+                                if (n == null) {
                                     message.reply("請先加入一個遊戲後再移動棋子").queue();
                                 } else {
                                     Game game = Game.getGame(n);
@@ -266,7 +266,6 @@ public class EventListener implements net.dv8tion.jda.api.hooks.EventListener {
                                                 message.reply("已接受").queue();
                                                 message.getChannel().sendMessage(game.getMessage()).addFiles(FileUpload.fromData(game.toImage())).queue();
                                                 game.updateTime(timeGot);
-                                                game.redPlaying = !game.redPlaying;
                                                 break;
                                             default:
                                                 message.reply(res).queue();
