@@ -25,7 +25,6 @@ public class BoardImage {
     private final File file;
     private long deadTime;
 
-    //TODO Image not updating
     public BoardImage(Position[][][] positions, String id) throws IOException {
         // setup
         this.id = id;
@@ -68,7 +67,16 @@ public class BoardImage {
                 5 + positions[color][type][number].y() * 100,
                 90,
                 90);
-        graphics2D.setFont(new Font("ITALIC", Font.BOLD, 70));
+        File ff = new File("./ChenYuluoyan-Thin-Monospaced.ttf");
+        Font font;
+        try {
+            font = Font.createFont(Font.TRUETYPE_FONT, ff);
+        } catch (FontFormatException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        graphics2D.setFont(font.deriveFont(70f));
         graphics2D.drawString(name[color][type],
                 55 + positions[color][type][number].x() * 100 + 10,
                 5 + positions[color][type][number].y() * 100 + 70);
